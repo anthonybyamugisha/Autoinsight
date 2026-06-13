@@ -59,6 +59,10 @@ class DatasetUploadView(APIView):
             ]
             DataRecord.objects.bulk_create(records, batch_size=1000)
 
+            # Audit log
+            log_action(request.user, 'upload', f'Uploaded dataset {dataset.name} ({dataset.row_count} rows)',
+                       'dataset', dataset.id, request)
+
         except Exception as e:
             dataset.status = 'failed'
             dataset.save()
