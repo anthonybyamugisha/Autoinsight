@@ -10,6 +10,8 @@ import Dashboard from './pages/Dashboard';
 import Upload from './pages/Upload';
 import DatasetList from './pages/DatasetList';
 import DatasetDetail from './pages/DatasetDetail';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 
 function AppLayout() {
   return (
@@ -23,6 +25,8 @@ function AppLayout() {
             <Route path="/upload" element={<Upload />} />
             <Route path="/datasets" element={<DatasetList />} />
             <Route path="/datasets/:id" element={<DatasetDetail />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>
       </div>
