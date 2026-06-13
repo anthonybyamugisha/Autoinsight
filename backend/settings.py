@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     # Local apps
     'backend.users.apps.UsersConfig',
     'backend.datasets.apps.DatasetsConfig',
+    'backend.audit.apps.AuditConfig',
 ]
 
 MIDDLEWARE = [

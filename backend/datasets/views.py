@@ -12,6 +12,7 @@ from .serializers import (
 )
 from .utils import process_uploaded_file
 from backend.users.permissions import IsAnalystOrAdmin, IsOwnerOrAdmin
+from backend.audit.utils import log_action
 
 
 class DatasetUploadView(APIView):
@@ -97,6 +98,17 @@ class DatasetDetailView(generics.RetrieveDestroyAPIView):
     queryset = Dataset.objects.all()
     serializer_class = DatasetDetailSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrAdmin)
+
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, *args, **kwargs)
+        log_action(request.user, 'view', f'Viewed dataset {self.get_object().name}',
+                   'dataset', self.get_object().id, request)
+        return response
+
+    def perform_destroy(self, instance):
+        log_action(self.request.user, 'delete', f'Deleted dataset {instance.name}',
+                   'dataset', instance.id, self.request)
+        instance.delete()
 
 
 class DatasetPreviewView(APIView):
