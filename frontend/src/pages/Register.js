@@ -44,9 +44,8 @@ export default function Register() {
         <Row className="justify-content-center align-items-center min-vh-100 py-5">
           <Col md={6} lg={5}>
             <div className="text-center mb-4">
-              <div className="brand-icon-lg">AI</div>
-              <h2 className="mt-3 fw-bold">AutoInsight</h2>
-              <p className="text-muted">Create your account</p>
+              <h2 className="fw-bold" style={{color: '#FFFFFF'}}>AutoInsight</h2>
+              <p style={{color: 'rgba(255,255,255,0.6)'}}>Create your account</p>
             </div>
 
             <Card className="auth-card border-0 shadow-sm">

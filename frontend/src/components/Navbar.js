@@ -21,8 +21,7 @@ export default function Navbar() {
   return (
     <BsNavbar expand="lg" className="navbar-main shadow-sm" sticky="top">
       <Container fluid>
-        <BsNavbar.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
-          <div className="brand-icon">AI</div>
+        <BsNavbar.Brand as={Link} to="/" className="d-flex align-items-center">
           <span className="brand-text">AutoInsight</span>
         </BsNavbar.Brand>
 
