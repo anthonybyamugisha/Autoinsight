@@ -13,7 +13,7 @@ import { toast } from 'react-toastify';
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, Filler);
 
-const CHART_COLORS = ['#0066CC', '#FFE600', '#D32F2F', '#16A34A', '#0EA5E9', '#F59E0B', '#8B5CF6', '#EC4899'];
+const CHART_COLORS = ['#0055BB', '#FFE600', '#D32F2F', '#16A34A', '#0EA5E9', '#F59E0B', '#8B5CF6', '#EC4899'];
 
 export default function Analytics() {
   const [datasets, setDatasets] = useState([]);
@@ -63,13 +63,13 @@ export default function Analytics() {
       datasets: [{
         label: `Mean ${trends.value_column}`,
         data: trends.mean,
-        backgroundColor: 'rgba(0,102,204,0.2)',
-        borderColor: '#0066CC',
+        backgroundColor: 'rgba(0,85,187,0.2)',
+        borderColor: '#0055BB',
         borderWidth: 2,
         fill: true,
         tension: 0.3,
         pointRadius: 4,
-        pointBackgroundColor: '#0066CC',
+        pointBackgroundColor: '#0055BB',
       }, {
         label: `Sum ${trends.value_column}`,
         data: trends.sum,

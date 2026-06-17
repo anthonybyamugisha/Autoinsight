@@ -357,7 +357,7 @@ class ReportExportView(APIView):
             # Format worksheets
             workbook = writer.book
             header_fmt = workbook.add_format({
-                'bold': True, 'bg_color': '#0066CC', 'font_color': 'white',
+                'bold': True, 'bg_color': '#0055BB', 'font_color': 'white',
                 'border': 1, 'text_wrap': True
             })
             for sheet_name in writer.sheets:
@@ -386,7 +386,7 @@ class ReportExportView(APIView):
 
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle('Title', parent=styles['Title'], fontSize=20,
-                                      textColor=colors.HexColor('#0066CC'), spaceAfter=6)
+                                      textColor=colors.HexColor('#0055BB'), spaceAfter=6)
         subtitle_style = ParagraphStyle('Sub', parent=styles['Normal'], fontSize=10,
                                          textColor=colors.grey, spaceAfter=20)
         heading_style = ParagraphStyle('Heading', parent=styles['Heading2'], fontSize=14,
@@ -413,7 +413,7 @@ class ReportExportView(APIView):
         ]
         summary_table = Table(summary_data, colWidths=[3*inch, 5*inch])
         summary_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0066CC')),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0055BB')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, -1), 9),
@@ -437,7 +437,7 @@ class ReportExportView(APIView):
             col_w = min(1.5*inch, 9*inch / len(stats_data[0]))
             stats_table = Table(stats_data, colWidths=[col_w]*len(stats_data[0]))
             stats_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0066CC')),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0055BB')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                 ('FONTSIZE', (0, 0), (-1, -1), 7),
@@ -458,7 +458,7 @@ class ReportExportView(APIView):
         col_w = min(1.2*inch, 9*inch / len(df.columns))
         data_table = Table(preview_data, colWidths=[col_w]*len(df.columns))
         data_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0066CC')),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0055BB')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, -1), 6),

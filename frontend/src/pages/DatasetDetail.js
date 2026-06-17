@@ -12,7 +12,7 @@ import { toast } from 'react-toastify';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-const CHART_COLORS = ['#0066CC', '#FFE600', '#D32F2F', '#16A34A', '#0EA5E9', '#F59E0B', '#8B5CF6', '#EC4899'];
+const CHART_COLORS = ['#0055BB', '#FFE600', '#D32F2F', '#16A34A', '#0EA5E9', '#F59E0B', '#8B5CF6', '#EC4899'];
 
 export default function DatasetDetail() {
   const { id } = useParams();
@@ -66,7 +66,7 @@ export default function DatasetDetail() {
   if (loading) return <div className="text-center py-5"><Spinner animation="border" /></div>;
   if (!data) return null;
 
-  const { dataset, columns, records, total_rows, preview_rows } = data;
+  const { dataset, columns, records, total_rows } = data;
 
   const buildQualityChart = () => {
     if (!quality) return null;

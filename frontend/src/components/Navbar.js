@@ -1,9 +1,9 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
-import { Navbar as BsNavbar, Nav, Container, Dropdown, Badge } from 'react-bootstrap';
+import { Navbar as BsNavbar, Nav, Container, Dropdown } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { auditService } from '../services/audit';
-import { FiUser, FiLogOut, FiSettings, FiBell, FiAlertTriangle, FiCheck, FiCheckCircle } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiSettings, FiBell, FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
 
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
