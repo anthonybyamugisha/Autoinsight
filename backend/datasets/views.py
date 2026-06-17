@@ -4,15 +4,19 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.db import transaction
+import os
 
 from .models import Dataset, DataRecord
 from .serializers import (
     DatasetUploadSerializer, DatasetListSerializer,
     DatasetDetailSerializer, DataRecordSerializer
 )
-from .utils import process_uploaded_file
+from .utils import process_uploaded_file, MAX_DB_ROWS
 from backend.users.permissions import IsAnalystOrAdmin, IsOwnerOrAdmin
 from backend.audit.utils import log_action
+
+# Max upload file size (default 500 MB)
+MAX_UPLOAD_SIZE = int(os.environ.get('MAX_UPLOAD_SIZE_MB', 500)) * 1024 * 1024
 
 
 class DatasetUploadView(APIView):
@@ -28,6 +32,14 @@ class DatasetUploadView(APIView):
             return Response(
                 {'error': 'No file provided.'},
                 status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # File size guard
+        if file_obj.size > MAX_UPLOAD_SIZE:
+            max_mb = MAX_UPLOAD_SIZE // (1024 * 1024)
+            return Response(
+                {'error': f'File too large. Maximum allowed size is {max_mb} MB.'},
+                status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
             )
 
         # Create dataset record
@@ -48,7 +60,7 @@ class DatasetUploadView(APIView):
             dataset.status = 'completed'
             dataset.save()
 
-            # Store records in bulk
+            # Bulk-create DB records in chunks for performance
             records = [
                 DataRecord(
                     dataset=dataset,
@@ -57,10 +69,14 @@ class DatasetUploadView(APIView):
                 )
                 for r in result['records']
             ]
-            DataRecord.objects.bulk_create(records, batch_size=1000)
+            CHUNK_SIZE = 5000
+            for i in range(0, len(records), CHUNK_SIZE):
+                DataRecord.objects.bulk_create(records[i:i + CHUNK_SIZE])
 
             # Audit log
-            log_action(request.user, 'upload', f'Uploaded dataset {dataset.name} ({dataset.row_count} rows)',
+            capped_note = ' (DB preview capped at {:,} rows)'.format(MAX_DB_ROWS) if result.get('records_capped') else ''
+            log_action(request.user, 'upload',
+                       f'Uploaded dataset {dataset.name} ({dataset.row_count:,} rows){capped_note}',
                        'dataset', dataset.id, request)
 
         except Exception as e:
