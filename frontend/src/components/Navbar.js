@@ -46,7 +46,7 @@ export default function Navbar() {
   return (
     <BsNavbar expand="lg" className="navbar-main shadow-sm" sticky="top">
       <Container fluid>
-        <BsNavbar.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
+        <BsNavbar.Brand as={Link} to="/dashboard" className="d-flex align-items-center gap-2">
           <img src="/images/centenary%20bank%20logo.png" alt="Centenary Bank" className="brand-logo" />
           <span className="brand-text">AutoInsight</span>
         </BsNavbar.Brand>

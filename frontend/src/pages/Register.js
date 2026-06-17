@@ -24,7 +24,7 @@ export default function Register() {
     try {
       await register(form);
       toast.success('Account created successfully!');
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       const data = err.response?.data;
       if (data) {

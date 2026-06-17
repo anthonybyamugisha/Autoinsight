@@ -4,7 +4,7 @@ import { NavLink } from 'react-router-dom';
 import { FiGrid, FiUploadCloud, FiDatabase, FiBarChart2, FiFileText } from 'react-icons/fi';
 
 const navItems = [
-  { path: '/', icon: FiGrid, label: 'Dashboard' },
+  { path: '/dashboard', icon: FiGrid, label: 'Dashboard' },
   { path: '/upload', icon: FiUploadCloud, label: 'Upload Data' },
   { path: '/datasets', icon: FiDatabase, label: 'Datasets' },
   { path: '/analytics', icon: FiBarChart2, label: 'Analytics' },
@@ -20,7 +20,7 @@ export default function Sidebar() {
             key={path}
             as={NavLink}
             to={path}
-            end={path === '/'}
+            end={path === '/dashboard'}
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
           >
             <Icon size={18} className="me-2" />
