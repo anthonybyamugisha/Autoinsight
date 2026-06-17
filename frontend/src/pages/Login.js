@@ -83,6 +83,12 @@ export default function Login() {
 
                 <div className="text-center mt-3">
                   <small className="text-muted">
+                    <Link to="/forgot-password" className="link-custom">Forgot password?</Link>
+                  </small>
+                </div>
+
+                <div className="text-center mt-2">
+                  <small className="text-muted">
                     Don't have an account? <Link to="/register" className="link-custom">Create Account</Link>
                   </small>
                 </div>

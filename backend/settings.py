@@ -160,3 +160,15 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': False,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+# Frontend URL (used in password reset emails)
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+
+# Email settings (console backend for development — emails print to terminal)
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.console.EmailBackend',
+)
+DEFAULT_FROM_EMAIL = 'AutoInsight <noreply@centenarybank.com>'
+# For production SMTP, set these via environment variables:
+# EMAIL_HOST, EMAIL_PORT, EMAIL_USE_TLS, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD

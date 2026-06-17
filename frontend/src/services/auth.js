@@ -34,4 +34,18 @@ export const authService = {
     localStorage.removeItem('tokens');
     localStorage.removeItem('user');
   },
+
+  forgotPassword: async (email) => {
+    const { data } = await api.post(`${API_BASE_URL}/users/forgot-password/`, { email });
+    return data;
+  },
+
+  resetPassword: async (uid, token, newPassword) => {
+    const { data } = await api.post(`${API_BASE_URL}/users/reset-password/`, {
+      uid,
+      token,
+      new_password: newPassword,
+    });
+    return data;
+  },
 };
