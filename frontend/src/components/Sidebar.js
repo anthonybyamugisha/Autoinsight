@@ -30,7 +30,8 @@ export default function Sidebar() {
       </Nav>
 
       <div className="sidebar-footer p-3 mt-auto">
-        <div className="sidebar-footer-card">
+        <div className="sidebar-footer-card text-center">
+          <img src="/images/centenary%20bank%20logo.png" alt="Centenary Bank" className="sidebar-logo mb-2" />
           <small className="d-block" style={{color: 'rgba(255,230,0,0.8)', fontWeight: 600}}>AutoInsight v1.0</small>
           <small className="d-block" style={{color: 'rgba(255,255,255,0.5)'}}>Centenary Bank QA</small>
         </div>

@@ -30,6 +30,7 @@ export default function ForgotPassword() {
         <Row className="justify-content-center align-items-center min-vh-100">
           <Col md={5} lg={4}>
             <div className="text-center mb-4">
+              <img src="/images/centenary%20bank%20logo.png" alt="Centenary Bank" className="auth-logo mb-3" />
               <h2 className="fw-bold" style={{ color: '#FFFFFF' }}>AutoInsight</h2>
               <p style={{ color: 'rgba(255,255,255,0.6)' }}>Password Recovery</p>
             </div>
