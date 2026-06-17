@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Spinner, Badge } from 'react-bootstrap';
 import { AuthContext } from '../context/AuthContext';
 import { datasetService } from '../services/datasets';
 import { auditService } from '../services/audit';
-import { FiDatabase, FiFile, FiHardDrive, FiActivity, FiUploadCloud, FiEye, FiTrash2, FiDownload, FiAlertTriangle } from 'react-icons/fi';
+import { FiDatabase, FiFile, FiHardDrive, FiActivity, FiUploadCloud, FiEye, FiTrash2, FiDownload, FiAlertCircle } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
 const ACTION_ICONS = {
@@ -35,7 +35,7 @@ export default function Dashboard() {
     { icon: FiDatabase, label: 'Total Datasets', value: summary?.total_datasets || 0, color: 'var(--primary)' },
     { icon: FiFile, label: 'Total Records', value: summary?.total_records?.toLocaleString() || 0, color: 'var(--success)' },
     { icon: FiHardDrive, label: 'Storage Used', value: formatSize(summary?.total_file_size || 0), color: 'var(--warning)' },
-    { icon: FiAlertTriangle, label: 'Alerts', value: alertCount, color: alertCount > 0 ? 'var(--accent)' : 'var(--info)' },
+    { icon: FiAlertCircle, label: 'Alerts', value: alertCount, color: alertCount > 0 ? 'var(--accent)' : 'var(--info)' },
   ];
 
   function formatSize(bytes) {
@@ -74,7 +74,7 @@ export default function Dashboard() {
 
       <Row className="g-4">
         {/* Recent Activity */}
-        <Col lg={8}>
+        <Col lg={alertCount > 0 ? 8 : 12}>
           <Card className="border-0 shadow-sm h-100">
             <Card.Header className="bg-white border-0 fw-semibold py-3">Recent Activity</Card.Header>
             <Card.Body className="p-0">
@@ -114,39 +114,25 @@ export default function Dashboard() {
           </Card>
         </Col>
 
-        {/* Quick Actions + Alerts */}
-        <Col lg={4}>
-          <Card className="border-0 shadow-sm mb-4">
-            <Card.Header className="bg-white border-0 fw-semibold py-3">Quick Actions</Card.Header>
-            <Card.Body>
-              <div className="d-grid gap-2">
-                <button className="btn btn-primary-custom" onClick={() => navigate('/upload')}>
-                  <FiUploadCloud className="me-2" /> Upload New Dataset
-                </button>
-                <button className="btn btn-outline-custom" onClick={() => navigate('/datasets')}>
-                  <FiDatabase className="me-2" /> View All Datasets
-                </button>
-                <button className="btn btn-outline-custom" onClick={() => navigate('/analytics')}>
-                  <FiActivity className="me-2" /> Open Analytics
-                </button>
-              </div>
-            </Card.Body>
-          </Card>
-
-          {alertCount > 0 && (
-            <Card className="border-0 shadow-sm alert-card">
-              <Card.Body className="d-flex align-items-center gap-3">
-                <div className="alert-icon-pulse">
-                  <FiAlertTriangle size={20} />
+        {/* Alerts */}
+        {alertCount > 0 && (
+          <Col lg={4}>
+            <Card className="border-0 shadow-sm alert-card h-100">
+              <Card.Header className="bg-white border-0 fw-semibold py-3 d-flex align-items-center gap-2">
+                <FiAlertCircle size={18} className="text-warning" /> Alerts
+              </Card.Header>
+              <Card.Body className="pt-0">
+                <div className="mb-3">
+                  <div className="fw-bold fs-2">{alertCount}</div>
+                  <div className="text-muted small">Unread alert{alertCount > 1 ? 's' : ''} — quality issues or anomalies detected</div>
                 </div>
-                <div>
-                  <div className="fw-bold small">{alertCount} Unread Alert{alertCount > 1 ? 's' : ''}</div>
-                  <div className="text-muted" style={{ fontSize: '0.8rem' }}>Quality issues or anomalies detected</div>
-                </div>
+                <button className="btn btn-outline-custom w-100 btn-sm" onClick={() => navigate('/analytics')}>
+                  View Analytics
+                </button>
               </Card.Body>
             </Card>
-          )}
-        </Col>
+          </Col>
+        )}
       </Row>
     </Container>
   );

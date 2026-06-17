@@ -13,7 +13,7 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <div className="sidebar d-none d-lg-flex flex-column">
+    <div className="sidebar d-flex flex-column">
       <Nav className="flex-column gap-1 p-3">
         {navItems.map(({ path, icon: Icon, label }) => (
           <Nav.Link

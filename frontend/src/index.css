@@ -600,6 +600,31 @@ h1, h2, h3, h4, h5, h6 {
   .app-main {
     margin-left: 0;
   }
+  .sidebar {
+    position: relative;
+    top: 0;
+    width: 100%;
+    min-height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .sidebar .nav-link,
+  .sidebar .sidebar-link {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem !important;
+    margin-bottom: 0;
+  }
+  .sidebar .p-3 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0.5rem !important;
+  }
+  .sidebar-footer {
+    display: none;
+  }
 }
 
 @media (min-width: 992px) {

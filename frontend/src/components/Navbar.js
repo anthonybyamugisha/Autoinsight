@@ -52,15 +52,7 @@ export default function Navbar() {
 
         <BsNavbar.Toggle aria-controls="main-nav" />
         <BsNavbar.Collapse id="main-nav">
-          <Nav className="me-auto">
-            <Nav.Link as={Link} to="/">Dashboard</Nav.Link>
-            <Nav.Link as={Link} to="/upload">Upload Data</Nav.Link>
-            <Nav.Link as={Link} to="/datasets">Datasets</Nav.Link>
-            <Nav.Link as={Link} to="/analytics">Analytics</Nav.Link>
-            <Nav.Link as={Link} to="/reports">Reports</Nav.Link>
-          </Nav>
-
-          <Nav className="align-items-center gap-2">
+          <Nav className="ms-auto align-items-center gap-2">
             {/* Notification Bell with Alerts */}
             <Dropdown align="end" onToggle={(open) => { if (open) fetchAlerts(); }}>
               <Dropdown.Toggle variant="link" className="notification-toggle" noCaret>
