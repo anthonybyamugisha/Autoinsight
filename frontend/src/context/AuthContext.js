@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(async (email, password) => {
-    const data = await authService.login(email, password);
+    await authService.login(email, password);
     const profile = await authService.getProfile();
     setUser(profile);
     return profile;

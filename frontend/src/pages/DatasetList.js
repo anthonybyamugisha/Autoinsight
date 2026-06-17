@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Card, Table, Button, Badge, Form, InputGroup, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { datasetService } from '../services/datasets';
@@ -11,15 +11,15 @@ export default function DatasetList() {
   const [search, setSearch] = useState('');
   const navigate = useNavigate();
 
-  const fetchDatasets = () => {
+  const fetchDatasets = useCallback(() => {
     setLoading(true);
     datasetService.list({ search })
       .then((data) => setDatasets(data.results || data))
       .catch(() => toast.error('Failed to load datasets'))
       .finally(() => setLoading(false));
-  };
+  }, [search]);
 
-  useEffect(() => { fetchDatasets(); }, [search]);
+  useEffect(() => { fetchDatasets(); }, [fetchDatasets]);
 
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Delete dataset "${name}"? This cannot be undone.`)) return;

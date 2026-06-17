@@ -1,13 +1,10 @@
-import React, { useState, useContext } from 'react';
-import { Container, Row, Col, Card, Form, Button, Badge, Alert, Spinner } from 'react-bootstrap';
+import React, { useContext } from 'react';
+import { Container, Row, Col, Card, Badge } from 'react-bootstrap';
 import { AuthContext } from '../context/AuthContext';
-import { authService } from '../services/auth';
-import { FiUser, FiMail, FiBriefcase, FiPhone, FiSave, FiShield } from 'react-icons/fi';
-import { toast } from 'react-toastify';
+import { FiUser, FiMail, FiBriefcase, FiPhone, FiShield } from 'react-icons/fi';
 
 export default function Profile() {
   const { user } = useContext(AuthContext);
-  const [saving, setSaving] = useState(false);
 
   const roleColors = { admin: 'danger', analyst: 'primary', manager: 'success' };
 

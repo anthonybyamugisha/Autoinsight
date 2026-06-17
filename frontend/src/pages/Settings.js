@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { AuthContext } from '../context/AuthContext';
 import { authService } from '../services/auth';
-import { FiLock, FiEye, FiEyeOff, FiShield, FiBell, FiPalette } from 'react-icons/fi';
+import { FiLock, FiEye, FiEyeOff, FiShield, FiBell } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
 export default function Settings() {

@@ -204,8 +204,9 @@ h1, h2, h3, h4, h5, h6 {
   border-right: 1px solid rgba(255,255,255,0.1);
 }
 
-.sidebar-link {
-  color: rgba(255, 255, 255, 0.75) !important;
+.sidebar .nav-link,
+.sidebar .sidebar-link {
+  color: rgba(255, 255, 255, 0.85) !important;
   font-weight: 500;
   font-size: 0.875rem;
   padding: 0.65rem 1rem !important;
@@ -216,16 +217,18 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 2px;
 }
 
-.sidebar-link:hover {
-  color: white !important;
-  background: var(--bg-sidebar-hover);
+.sidebar .nav-link:hover,
+.sidebar .sidebar-link:hover {
+  color: #FFFFFF !important;
+  background: rgba(255, 255, 255, 0.15);
 }
 
-.sidebar-link.active {
-  color: white !important;
-  background: var(--bg-sidebar-active);
+.sidebar .nav-link.active,
+.sidebar .sidebar-link.active {
+  color: #FFFFFF !important;
+  background: rgba(255, 255, 255, 0.22);
   font-weight: 600;
-  border-left: 3px solid var(--primary);
+  border-left: 3px solid #FFE600;
 }
 
 .sidebar-footer-card {
