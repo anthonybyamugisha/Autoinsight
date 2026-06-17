@@ -1,26 +1,41 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Card, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card, Spinner, Badge } from 'react-bootstrap';
 import { AuthContext } from '../context/AuthContext';
 import { datasetService } from '../services/datasets';
-import { FiDatabase, FiFile, FiHardDrive, FiTrendingUp } from 'react-icons/fi';
+import { auditService } from '../services/audit';
+import { FiDatabase, FiFile, FiHardDrive, FiActivity, FiUploadCloud, FiEye, FiTrash2, FiDownload, FiAlertTriangle } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+
+const ACTION_ICONS = {
+  upload: FiUploadCloud, view: FiEye, delete: FiTrash2,
+  export: FiDownload, login: FiActivity, register: FiActivity,
+};
 
 export default function Dashboard() {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [summary, setSummary] = useState(null);
+  const [recentLogs, setRecentLogs] = useState([]);
+  const [alertCount, setAlertCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    datasetService.summary()
-      .then(setSummary)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    Promise.all([
+      datasetService.summary().catch(() => null),
+      auditService.getLogs().then((d) => (d.results || d).slice(0, 8)).catch(() => []),
+      auditService.getUnreadCount().then((d) => d.unread_count).catch(() => 0),
+    ]).then(([s, logs, count]) => {
+      setSummary(s);
+      setRecentLogs(logs);
+      setAlertCount(count);
+    }).finally(() => setLoading(false));
   }, []);
 
   const kpiCards = [
     { icon: FiDatabase, label: 'Total Datasets', value: summary?.total_datasets || 0, color: 'var(--primary)' },
     { icon: FiFile, label: 'Total Records', value: summary?.total_records?.toLocaleString() || 0, color: 'var(--success)' },
     { icon: FiHardDrive, label: 'Storage Used', value: formatSize(summary?.total_file_size || 0), color: 'var(--warning)' },
-    { icon: FiTrendingUp, label: 'Active Users', value: '-', color: 'var(--info)' },
+    { icon: FiAlertTriangle, label: 'Alerts', value: alertCount, color: alertCount > 0 ? 'var(--accent)' : 'var(--info)' },
   ];
 
   function formatSize(bytes) {
@@ -30,11 +45,7 @@ export default function Dashboard() {
   }
 
   if (loading) {
-    return (
-      <div className="d-flex justify-content-center py-5">
-        <Spinner animation="border" variant="primary" />
-      </div>
-    );
+    return <div className="d-flex justify-content-center py-5"><Spinner animation="border" variant="primary" /></div>;
   }
 
   return (
@@ -44,14 +55,13 @@ export default function Dashboard() {
         <p className="text-muted mb-0">Here's your data overview</p>
       </div>
 
+      {/* KPI Cards */}
       <Row className="g-4 mb-4">
         {kpiCards.map(({ icon: Icon, label, value, color }) => (
           <Col key={label} sm={6} lg={3}>
             <Card className="kpi-card border-0 shadow-sm h-100">
               <Card.Body className="d-flex align-items-center gap-3">
-                <div className="kpi-icon" style={{ backgroundColor: color + '15', color }}>
-                  <Icon size={24} />
-                </div>
+                <div className="kpi-icon" style={{ backgroundColor: color + '15', color }}><Icon size={24} /></div>
                 <div>
                   <div className="text-muted small">{label}</div>
                   <div className="fw-bold fs-4">{value}</div>
@@ -63,24 +73,79 @@ export default function Dashboard() {
       </Row>
 
       <Row className="g-4">
+        {/* Recent Activity */}
         <Col lg={8}>
-          <Card className="border-0 shadow-sm">
+          <Card className="border-0 shadow-sm h-100">
             <Card.Header className="bg-white border-0 fw-semibold py-3">Recent Activity</Card.Header>
-            <Card.Body>
-              <p className="text-muted text-center py-4">Upload datasets to see activity here.</p>
+            <Card.Body className="p-0">
+              {recentLogs.length === 0 ? (
+                <div className="text-center py-5">
+                  <FiActivity size={36} className="text-muted mb-3 d-block mx-auto" />
+                  <p className="text-muted">Upload datasets to see activity here.</p>
+                </div>
+              ) : (
+                <div className="activity-list">
+                  {recentLogs.map((log) => {
+                    const ActionIcon = ACTION_ICONS[log.action] || FiActivity;
+                    return (
+                      <div key={log.id} className="activity-item d-flex align-items-center gap-3 px-4 py-3">
+                        <div className="activity-icon" data-action={log.action}>
+                          <ActionIcon size={14} />
+                        </div>
+                        <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                          <div className="small fw-semibold text-truncate">{log.description}</div>
+                          <small className="text-muted" style={{ fontSize: '0.75rem' }}>
+                            {log.user_name} &middot; {new Date(log.created_at).toLocaleString()}
+                          </small>
+                        </div>
+                        <Badge bg={
+                          log.action === 'upload' ? 'success' :
+                          log.action === 'delete' ? 'danger' :
+                          log.action === 'export' ? 'info' : 'secondary'
+                        } className="activity-badge">
+                          {log.action}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </Card.Body>
           </Card>
         </Col>
+
+        {/* Quick Actions + Alerts */}
         <Col lg={4}>
-          <Card className="border-0 shadow-sm">
+          <Card className="border-0 shadow-sm mb-4">
             <Card.Header className="bg-white border-0 fw-semibold py-3">Quick Actions</Card.Header>
             <Card.Body>
               <div className="d-grid gap-2">
-                <a href="/upload" className="btn btn-primary-custom">Upload New Dataset</a>
-                <a href="/datasets" className="btn btn-outline-custom">View All Datasets</a>
+                <button className="btn btn-primary-custom" onClick={() => navigate('/upload')}>
+                  <FiUploadCloud className="me-2" /> Upload New Dataset
+                </button>
+                <button className="btn btn-outline-custom" onClick={() => navigate('/datasets')}>
+                  <FiDatabase className="me-2" /> View All Datasets
+                </button>
+                <button className="btn btn-outline-custom" onClick={() => navigate('/analytics')}>
+                  <FiActivity className="me-2" /> Open Analytics
+                </button>
               </div>
             </Card.Body>
           </Card>
+
+          {alertCount > 0 && (
+            <Card className="border-0 shadow-sm alert-card">
+              <Card.Body className="d-flex align-items-center gap-3">
+                <div className="alert-icon-pulse">
+                  <FiAlertTriangle size={20} />
+                </div>
+                <div>
+                  <div className="fw-bold small">{alertCount} Unread Alert{alertCount > 1 ? 's' : ''}</div>
+                  <div className="text-muted" style={{ fontSize: '0.8rem' }}>Quality issues or anomalies detected</div>
+                </div>
+              </Card.Body>
+            </Card>
+          )}
         </Col>
       </Row>
     </Container>
