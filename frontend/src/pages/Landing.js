@@ -70,11 +70,11 @@ export default function Landing() {
             Upload any dataset and get instant analytics, data quality scores,
             anomaly detection, and professional reports — no data science degree required.
           </p>
-          <div className="d-flex justify-content-center gap-3 mt-4">
-            <Link to="/register" className="btn btn-landing-primary btn-lg px-4">
+          <div className="d-flex justify-content-center gap-3 mt-4" style={{ position: 'relative', zIndex: 1 }}>
+            <Link to="/register" className="btn btn-landing-primary-white btn-lg px-4">
               Get Started <FiArrowRight className="ms-2" />
             </Link>
-            <Link to="/login" className="btn btn-landing-outline btn-lg px-4">
+            <Link to="/login" className="btn btn-landing-ghost btn-lg px-4">
               Sign In
             </Link>
           </div>
@@ -85,6 +85,7 @@ export default function Landing() {
       <section className="landing-features">
         <div className="landing-container">
           <div className="text-center mb-5">
+            <span className="features-section-badge">Features</span>
             <h2 className="features-title">Everything you need for data-driven QA</h2>
             <p className="features-subtitle text-muted">
               Powerful tools designed for quality assurance teams
