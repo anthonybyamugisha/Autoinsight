@@ -2,6 +2,7 @@ from rest_framework import status, generics, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -55,7 +56,7 @@ class LoginView(TokenObtainPairView):
         serializer = self.get_serializer(data={'email': email, 'password': password})
         try:
             serializer.is_valid(raise_exception=True)
-        except serializers.ValidationError:
+        except (serializers.ValidationError, AuthenticationFailed):
             locked, count = record_failed_login(email)
             log_action(
                 None,
@@ -65,6 +66,10 @@ class LoginView(TokenObtainPairView):
             )
             if locked:
                 on_failed_login(email, request, count)
+                return Response(
+                    {'detail': 'Account temporarily locked due to multiple failed attempts. Try again later.'},
+                    status=status.HTTP_429_TOO_MANY_REQUESTS,
+                )
             return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
 
         clear_login_attempts(email)

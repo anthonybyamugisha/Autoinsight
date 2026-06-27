@@ -105,9 +105,14 @@ class SecurityAccessTests(TestCase):
         self.assertEqual(self.client.get('/api/users/list/').status_code, status.HTTP_200_OK)
 
     def test_login_lockout_after_failed_attempts(self):
-        for _ in range(5):
-            self.client.post('/api/users/login/', {'email': 'a@test.com', 'password': 'wrong'})
+        for _ in range(4):
+            resp = self.client.post('/api/users/login/', {'email': 'a@test.com', 'password': 'wrong'})
+            self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+        # 5th failed attempt triggers lockout
         response = self.client.post('/api/users/login/', {'email': 'a@test.com', 'password': 'wrong'})
+        self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+        # Valid password is also blocked while locked
+        response = self.client.post('/api/users/login/', {'email': 'a@test.com', 'password': 'TestPass123!'})
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
 
     def test_security_summary_requires_assurance_or_admin(self):

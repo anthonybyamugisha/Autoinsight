@@ -21,6 +21,19 @@ from backend.users.permissions import IsNotAssurance
 
 # ===== ANALYTICS ENGINE =====
 
+def _safe_float(val):
+    """Convert to JSON-safe float (NaN/Inf become None)."""
+    if val is None:
+        return None
+    try:
+        f = float(val)
+        if f != f or f in (float('inf'), float('-inf')):  # NaN or Inf
+            return None
+        return round(f, 2)
+    except (TypeError, ValueError):
+        return None
+
+
 class DatasetAnalyticsView(APIView):
     """Column-level statistics: mean, median, min, max, std, distribution."""
     permission_classes = (IsAuthenticated,)
@@ -39,12 +52,12 @@ class DatasetAnalyticsView(APIView):
             if pd.api.types.is_numeric_dtype(series):
                 col_info.update({
                     'type': 'numeric',
-                    'mean': round(float(series.mean()), 2) if series.notna().any() else None,
-                    'median': round(float(series.median()), 2) if series.notna().any() else None,
-                    'min': round(float(series.min()), 2) if series.notna().any() else None,
-                    'max': round(float(series.max()), 2) if series.notna().any() else None,
-                    'std': round(float(series.std()), 2) if series.notna().any() else None,
-                    'sum': round(float(series.sum()), 2) if series.notna().any() else None,
+                    'mean': _safe_float(series.mean()) if series.notna().any() else None,
+                    'median': _safe_float(series.median()) if series.notna().any() else None,
+                    'min': _safe_float(series.min()) if series.notna().any() else None,
+                    'max': _safe_float(series.max()) if series.notna().any() else None,
+                    'std': _safe_float(series.std()) if series.notna().any() else None,
+                    'sum': _safe_float(series.sum()) if series.notna().any() else None,
                 })
             else:
                 # Categorical / string column
