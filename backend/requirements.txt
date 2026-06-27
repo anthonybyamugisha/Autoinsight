@@ -1,9 +1,26 @@
+# ── Core ────────────────────────────────────────────────────────────────
 Django>=6.0,<7.0
 djangorestframework>=3.15
 djangorestframework-simplejwt>=5.4
 django-cors-headers>=4.6
+
+# ── Data processing ────────────────────────────────────────────────────
 pandas>=2.2
 numpy>=2.2
 openpyxl>=3.1
 xlsxwriter>=3.2
 reportlab>=4.3
+
+# ── Production ─────────────────────────────────────────────────────────
+# Vercel serverless adapter (when deploying the API via Vercel)
+serverless-wsgi>=3.0
+
+# Production database (PostgreSQL)
+psycopg2-binary>=2.9
+
+# Production static file serving
+whitenoise>=6.7
+
+# Production file storage (S3-compatible — AWS S3, DigitalOcean Spaces, etc.)
+django-storages>=1.14
+boto3>=1.34

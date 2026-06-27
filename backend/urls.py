@@ -26,5 +26,11 @@ urlpatterns = [
     path('api/audit/', include('backend.audit.urls')),
 ]
 
+# ── Static & media file serving ──────────────────────────────────────
+# In production, Whitenoise serves static files, and S3 serves media
+# files — no need for Django to handle them.
+# For local development, serve both via Django.
 if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
