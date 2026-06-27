@@ -12,7 +12,7 @@ export default function Assurance() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!['admin', 'assurance'].includes(user?.role)) return;
+    if (user?.role !== 'manager') return;
     Promise.all([
       auditService.getSecuritySummary().catch(() => null),
       auditService.getAlerts({ type: 'security' }).then((d) => d.results || d).catch(() => []),
@@ -22,11 +22,11 @@ export default function Assurance() {
     }).finally(() => setLoading(false));
   }, [user]);
 
-  if (!['admin', 'assurance'].includes(user?.role)) {
+  if (user?.role !== 'manager') {
     return (
       <Container fluid className="py-5 text-center">
         <FiLock size={40} className="text-muted mb-3" />
-        <h5 className="text-muted">Security Assurance view requires admin or assurance role.</h5>
+        <h5 className="text-muted">Security Assurance view requires manager role.</h5>
       </Container>
     );
   }

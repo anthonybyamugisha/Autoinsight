@@ -28,9 +28,9 @@ class SecurityAccessTests(TestCase):
             username='admin', email='admin@test.com', password='TestPass123!',
             role='admin', department='IT',
         )
-        self.assurance = User.objects.create_user(
-            username='assurance', email='assurance@test.com', password='TestPass123!',
-            role='assurance', department='Security',
+        self.manager = User.objects.create_user(
+            username='manager', email='manager@test.com', password='TestPass123!',
+            role='manager', department='Security',
         )
         self.dataset = Dataset.objects.create(
             name='Test Dataset',

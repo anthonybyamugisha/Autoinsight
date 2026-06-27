@@ -69,7 +69,7 @@ export default function DatasetDetail() {
   if (!data) return null;
 
   const { dataset, columns, records, total_rows, masked } = data;
-  const canExport = user?.role !== 'assurance';
+  const canExport = true;
   const classColor = { public: 'secondary', internal: 'info', confidential: 'warning', restricted: 'danger' };
 
   const buildQualityChart = () => {
@@ -119,11 +119,9 @@ export default function DatasetDetail() {
               </Button>
             </>
           )}
-          {user?.role !== 'assurance' && (
-            <Button variant="outline-danger" size="sm" onClick={handleDelete}>
-              <FiTrash2 className="me-1" /> Delete
-            </Button>
-          )}
+          <Button variant="outline-danger" size="sm" onClick={handleDelete}>
+            <FiTrash2 className="me-1" /> Delete
+          </Button>
         </div>
       </div>
 

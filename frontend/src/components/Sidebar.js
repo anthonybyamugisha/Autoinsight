@@ -15,10 +15,10 @@ export default function Sidebar() {
   const { user } = useContext(AuthContext);
 
   const navItems = [...baseNavItems];
-  if (['analyst', 'admin'].includes(user?.role)) {
+  if (user?.role === 'analyst' || user?.role === 'manager') {
     navItems.splice(1, 0, { path: '/upload', icon: FiUploadCloud, label: 'Upload Data' });
   }
-  if (['admin', 'assurance'].includes(user?.role)) {
+  if (user?.role === 'manager') {
     navItems.push({ path: '/assurance', icon: FiShield, label: 'Security Assurance' });
   }
 

@@ -17,17 +17,18 @@ export function PageTransition({ children }) {
 
 export function Skeleton({ variant = 'text', width, height, className = '' }) {
   const baseClass = 'skeleton';
+  const widthStr = typeof width === 'number' ? String(width) : width;
   const variantClass = variant === 'kpi' ? 'skeleton-kpi' :
                        variant === 'card' ? 'skeleton-card' :
                        variant === 'avatar' ? 'skeleton-avatar' :
                        variant === 'badge' ? 'skeleton-badge' :
                        variant === 'table-row' ? 'skeleton-table-row' :
                        variant === 'title' ? 'skeleton-title' :
-                       `skeleton-text ${width ? 'skeleton-text-' + width : ''}`;
+                       `skeleton-text ${widthStr ? 'skeleton-text-' + widthStr : ''}`;
 
   const style = {
     ...(height ? { height: typeof height === 'number' ? `${height}px` : height } : {}),
-    ...(width && !width.startsWith('skeleton-text') ? { width: typeof width === 'number' ? `${width}px` : width } : {}),
+    ...(widthStr && !widthStr.startsWith('skeleton-text') ? { width: widthStr } : {}),
   };
 
   return <div className={`${baseClass} ${variantClass} ${className}`} style={style} />;

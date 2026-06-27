@@ -116,7 +116,6 @@ export default function Register() {
                           <Form.Select name="role" value={form.role} onChange={handleChange} className="ps-5">
                             <option value="analyst">Analyst</option>
                             <option value="manager">Manager</option>
-                            <option value="admin">Admin</option>
                           </Form.Select>
                         </div>
                       </Form.Group>

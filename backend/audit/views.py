@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import AuditLog, Alert
 from .serializers import AuditLogSerializer, AlertSerializer
-from backend.users.permissions import IsAnalystOrManager
+from backend.users.permissions import IsManager
 from backend.datasets.access import datasets_for_user
 
 
@@ -19,7 +19,7 @@ SECURITY_ACTIONS = (
 
 def alerts_for_user(user):
     qs = Alert.objects.select_related('dataset', 'user')
-    if user.role in ('admin', 'assurance'):
+    if user.role == 'manager':
         return qs
     dataset_ids = datasets_for_user(user).values_list('id', flat=True)
     return qs.filter(Q(dataset_id__in=dataset_ids) | Q(user=user))
@@ -31,13 +31,13 @@ class AuditLogListView(generics.ListAPIView):
 
     def get_queryset(self):
         qs = AuditLog.objects.select_related('user').all()
-        if self.request.user.role not in ('admin', 'assurance'):
+        if self.request.user.role == 'analyst':
             qs = qs.filter(user=self.request.user)
         action_filter = self.request.query_params.get('action')
         if action_filter:
             qs = qs.filter(action=action_filter)
         user_filter = self.request.query_params.get('user')
-        if user_filter and self.request.user.role in ('admin', 'assurance'):
+        if user_filter and self.request.user.role == 'manager':
             qs = qs.filter(user_id=user_filter)
         security_only = self.request.query_params.get('security')
         if security_only and security_only.lower() in ('true', '1', 'yes'):
@@ -91,8 +91,8 @@ class UnreadAlertCountView(APIView):
 
 
 class SecuritySummaryView(APIView):
-    """Assurance dashboard metrics — admin and assurance roles only."""
-    permission_classes = (IsAuthenticated, IsAdminOrAssurance)
+    """Manager dashboard metrics."""
+    permission_classes = (IsAuthenticated, IsManager)
 
     def get(self, request):
         from backend.datasets.models import Dataset

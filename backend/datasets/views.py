@@ -115,7 +115,7 @@ class DatasetListView(generics.ListAPIView):
         if status_filter:
             qs = qs.filter(status=status_filter)
         user_filter = self.request.query_params.get('user')
-        if user_filter and self.request.user.role in ('admin', 'assurance'):
+        if user_filter and self.request.user.role == 'manager':
             qs = qs.filter(uploaded_by_id=user_filter)
         search = self.request.query_params.get('search')
         if search:
@@ -128,7 +128,7 @@ class DatasetListView(generics.ListAPIView):
 
 class DatasetDetailView(generics.RetrieveDestroyAPIView):
     serializer_class = DatasetDetailSerializer
-    permission_classes = (IsAuthenticated, IsNotAssurance)
+    permission_classes = (IsAuthenticated, IsAnalystOrManager)
 
     def get_queryset(self):
         apply_retention_expiry()

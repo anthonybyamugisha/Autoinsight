@@ -158,7 +158,7 @@ export default function Dashboard() {
                 <button className="btn btn-outline-custom w-100 btn-sm mb-2" onClick={() => navigate('/analytics')}>
                   View Analytics
                 </button>
-                {['admin', 'assurance'].includes(user?.role) && securityCount > 0 && (
+                {user?.role === 'manager' && securityCount > 0 && (
                   <Button variant="outline-danger" size="sm" className="w-100" onClick={() => navigate('/assurance')}>
                     <FiShield className="me-1" /> Security Assurance
                   </Button>

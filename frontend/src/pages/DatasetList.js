@@ -52,7 +52,7 @@ export default function DatasetList() {
           <h3 className="fw-bold mb-0">Datasets</h3>
           <p className="text-muted mb-0">Manage your uploaded data</p>
         </div>
-        {['analyst', 'admin'].includes(user?.role) && (
+        {(user?.role === 'analyst' || user?.role === 'manager') && (
           <Button className="btn-primary-custom" onClick={() => navigate('/upload')}>
             <FiUploadCloud className="me-2" /> Upload New
           </Button>
@@ -129,11 +129,9 @@ export default function DatasetList() {
                       <Button variant="outline-primary" size="sm" className="me-1 btn-press" onClick={() => navigate(`/datasets/${ds.id}`)}>
                         <FiEye />
                       </Button>
-                      {user?.role !== 'assurance' && (
-                        <Button variant="outline-danger" size="sm" className="btn-press" onClick={() => handleDelete(ds.id, ds.name)}>
-                          <FiTrash2 />
-                        </Button>
-                      )}
+                      <Button variant="outline-danger" size="sm" className="btn-press" onClick={() => handleDelete(ds.id, ds.name)}>
+                        <FiTrash2 />
+                      </Button>
                     </td>
                   </tr>
                 ))}

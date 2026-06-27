@@ -68,7 +68,7 @@ def mask_record_data(data, sensitive_columns):
 
 
 def should_mask_preview(user, dataset):
-    if user.role == 'admin':
+    if user.role == 'manager':
         return False
     if dataset.classification in ('confidential', 'restricted'):
         return True

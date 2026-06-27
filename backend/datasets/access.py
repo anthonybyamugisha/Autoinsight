@@ -3,7 +3,7 @@
 from django.utils import timezone
 from rest_framework.exceptions import NotFound, PermissionDenied
 
-from backend.audit.utils import log_action
+from backend.audit.utils import log_action  # noqa: F401
 
 
 def datasets_for_user(user):
@@ -11,9 +11,9 @@ def datasets_for_user(user):
     from .models import Dataset
 
     qs = Dataset.objects.select_related('uploaded_by')
-    if user.role in ('admin', 'assurance'):
-        return qs
     if user.role == 'manager':
+        return qs
+    if user.role == 'analyst':
         if user.department:
             return qs.filter(uploaded_by__department=user.department)
         return qs.filter(uploaded_by=user)
@@ -21,9 +21,9 @@ def datasets_for_user(user):
 
 
 def can_access_dataset(user, dataset):
-    if user.role in ('admin', 'assurance'):
-        return True
     if user.role == 'manager':
+        return True
+    if user.role == 'analyst':
         if user.department and dataset.uploaded_by.department == user.department:
             return True
         return dataset.uploaded_by_id == user.id
@@ -32,8 +32,8 @@ def can_access_dataset(user, dataset):
 
 def can_modify_dataset(user, dataset):
     if dataset.is_expired:
-        return user.role == 'admin'
-    if user.role == 'admin':
+        return user.role == 'manager'
+    if user.role == 'manager':
         return True
     return dataset.uploaded_by_id == user.id and user.role == 'analyst'
 
@@ -41,26 +41,22 @@ def can_modify_dataset(user, dataset):
 def can_export_dataset(user, dataset):
     if not can_access_dataset(user, dataset):
         return False
-    if user.role == 'assurance':
-        return False
     if dataset.is_expired:
         return False
     classification = dataset.classification
     if classification == 'restricted':
-        return user.role == 'admin' or (
+        return user.role == 'manager' or (
             dataset.uploaded_by_id == user.id and user.role == 'analyst'
         )
     if classification == 'confidential':
-        return user.role in ('admin', 'manager') or dataset.uploaded_by_id == user.id
+        return user.role in ('manager', 'analyst') or dataset.uploaded_by_id == user.id
     return True
 
 
 def can_preview_dataset(user, dataset):
     if not can_access_dataset(user, dataset):
         return False
-    if dataset.is_expired and user.role != 'admin':
-        return False
-    if user.role == 'assurance' and dataset.classification in ('restricted', 'confidential'):
+    if dataset.is_expired and user.role != 'manager':
         return False
     return True
 
@@ -92,7 +88,7 @@ def get_accessible_dataset(user, pk, request=None, permission='view'):
     except Dataset.DoesNotExist:
         raise NotFound('Dataset not found.')
 
-    if dataset.is_expired and permission != 'modify' and user.role != 'admin':
+    if dataset.is_expired and permission != 'modify' and user.role != 'manager':
         raise PermissionDenied('This dataset has expired and is no longer accessible.')
 
     if not can_access_dataset(user, dataset):
