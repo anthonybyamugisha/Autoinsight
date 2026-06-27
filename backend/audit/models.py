@@ -8,17 +8,30 @@ class AuditLog(models.Model):
         ('view', 'Dataset Viewed'),
         ('delete', 'Dataset Deleted'),
         ('login', 'User Logged In'),
+        ('login_failed', 'Login Failed'),
         ('logout', 'User Logged Out'),
         ('register', 'User Registered'),
         ('export', 'Report Exported'),
         ('password_change', 'Password Changed'),
+        ('password_reset_request', 'Password Reset Requested'),
         ('profile_update', 'Profile Updated'),
+        ('access_denied', 'Access Denied'),
+        ('analytics_view', 'Analytics Viewed'),
+        ('quality_view', 'Quality Report Viewed'),
+        ('anomaly_view', 'Anomaly Report Viewed'),
+        ('retention_expired', 'Dataset Retention Expired'),
     )
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='audit_logs')
-    action = models.CharField(max_length=30, choices=ACTION_CHOICES)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='audit_logs',
+        null=True,
+        blank=True,
+    )
+    action = models.CharField(max_length=40, choices=ACTION_CHOICES)
     description = models.TextField(blank=True, default='')
-    resource_type = models.CharField(max_length=50, blank=True, default='')  # e.g. 'dataset'
+    resource_type = models.CharField(max_length=50, blank=True, default='')
     resource_id = models.IntegerField(null=True, blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True, default='')
@@ -43,7 +56,27 @@ class Alert(models.Model):
         ('critical', 'Critical'),
     )
 
-    dataset = models.ForeignKey('datasets.Dataset', on_delete=models.CASCADE, related_name='alerts', null=True, blank=True)
+    ALERT_TYPE_CHOICES = (
+        ('quality', 'Data Quality'),
+        ('anomaly', 'Anomaly'),
+        ('security', 'Security'),
+    )
+
+    alert_type = models.CharField(max_length=20, choices=ALERT_TYPE_CHOICES, default='quality')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='alerts',
+        null=True,
+        blank=True,
+    )
+    dataset = models.ForeignKey(
+        'datasets.Dataset',
+        on_delete=models.CASCADE,
+        related_name='alerts',
+        null=True,
+        blank=True,
+    )
     title = models.CharField(max_length=255)
     message = models.TextField()
     severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES, default='info')

@@ -12,8 +12,11 @@ from django.http import HttpResponse
 
 from .models import Dataset, DataRecord
 from .utils import get_dataframe_from_dataset
+from .access import get_accessible_dataset
 from backend.audit.utils import log_action
 from backend.audit.models import Alert
+from backend.audit.security import check_bulk_export
+from backend.users.permissions import IsNotAssurance
 
 
 # ===== ANALYTICS ENGINE =====
@@ -23,11 +26,7 @@ class DatasetAnalyticsView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk):
-        try:
-            dataset = Dataset.objects.get(pk=pk)
-        except Dataset.DoesNotExist:
-            return Response({'error': 'Dataset not found.'}, status=404)
-
+        dataset = get_accessible_dataset(request.user, pk, request, permission='view')
         df = get_dataframe_from_dataset(dataset)
         if df.empty:
             return Response({'error': 'No data in dataset.'}, status=400)
@@ -59,9 +58,14 @@ class DatasetAnalyticsView(APIView):
 
             analytics[col] = col_info
 
-        # Log analytics view
-        log_action(request.user, 'view', f'Viewed analytics for {dataset.name}',
-                   'dataset', dataset.id, request)
+        log_action(
+            request.user,
+            'analytics_view',
+            f'Viewed analytics for {dataset.name}',
+            'dataset',
+            dataset.id,
+            request,
+        )
 
         return Response({
             'dataset_id': dataset.id,
@@ -77,11 +81,7 @@ class DatasetTrendView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk):
-        try:
-            dataset = Dataset.objects.get(pk=pk)
-        except Dataset.DoesNotExist:
-            return Response({'error': 'Dataset not found.'}, status=404)
-
+        dataset = get_accessible_dataset(request.user, pk, request, permission='view')
         df = get_dataframe_from_dataset(dataset)
         if df.empty:
             return Response({'error': 'No data.'}, status=400)
@@ -125,11 +125,7 @@ class DatasetQualityView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk):
-        try:
-            dataset = Dataset.objects.get(pk=pk)
-        except Dataset.DoesNotExist:
-            return Response({'error': 'Dataset not found.'}, status=404)
-
+        dataset = get_accessible_dataset(request.user, pk, request, permission='view')
         df = get_dataframe_from_dataset(dataset)
         if df.empty:
             return Response({'error': 'No data.'}, status=400)
@@ -199,12 +195,22 @@ class DatasetQualityView(APIView):
             Alert.objects.get_or_create(
                 dataset=dataset,
                 title=f'Low Data Quality: {dataset.name}',
+                alert_type='quality',
                 defaults={
                     'message': f'Data quality score is {score}/100 (Grade {grade}). '
                                f'{null_pct}% null values, {duplicate_pct}% duplicate rows.',
                     'severity': 'warning' if score >= 40 else 'critical',
                 }
             )
+
+        log_action(
+            request.user,
+            'quality_view',
+            f'Viewed quality report for {dataset.name} (score {score})',
+            'dataset',
+            dataset.id,
+            request,
+        )
 
         return Response({
             'dataset_id': dataset.id,
@@ -227,11 +233,7 @@ class DatasetAnomalyView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk):
-        try:
-            dataset = Dataset.objects.get(pk=pk)
-        except Dataset.DoesNotExist:
-            return Response({'error': 'Dataset not found.'}, status=404)
-
+        dataset = get_accessible_dataset(request.user, pk, request, permission='view')
         df = get_dataframe_from_dataset(dataset)
         if df.empty:
             return Response({'error': 'No data.'}, status=400)
@@ -285,12 +287,22 @@ class DatasetAnomalyView(APIView):
             Alert.objects.get_or_create(
                 dataset=dataset,
                 title=f'Anomaly Detected: {a["column"]}',
+                alert_type='anomaly',
                 defaults={
                     'message': f'{a["anomaly_count"]} anomalies ({a["anomaly_pct"]}%) in column "{a["column"]}". '
                                f'Expected range: [{a["lower_bound"]}, {a["upper_bound"]}].',
                     'severity': 'warning' if a['anomaly_pct'] <= 10 else 'critical',
                 }
             )
+
+        log_action(
+            request.user,
+            'anomaly_view',
+            f'Viewed anomaly report for {dataset.name}',
+            'dataset',
+            dataset.id,
+            request,
+        )
 
         return Response({
             'dataset_id': dataset.id,
@@ -305,20 +317,22 @@ class DatasetAnomalyView(APIView):
 
 class ReportExportView(APIView):
     """Export dataset report as PDF or Excel."""
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsNotAssurance)
 
     def get(self, request, pk):
-        try:
-            dataset = Dataset.objects.get(pk=pk)
-        except Dataset.DoesNotExist:
-            return Response({'error': 'Dataset not found.'}, status=404)
-
+        dataset = get_accessible_dataset(request.user, pk, request, permission='export')
         export_type = request.query_params.get('type', 'excel')
         df = get_dataframe_from_dataset(dataset)
 
-        # Log the export action
-        log_action(request.user, 'export', f'Exported {export_type} report for {dataset.name}',
-                   'dataset', dataset.id, request)
+        log_action(
+            request.user,
+            'export',
+            f'Exported {export_type} report for [{dataset.get_classification_display()}] {dataset.name}',
+            'dataset',
+            dataset.id,
+            request,
+        )
+        check_bulk_export(request.user, dataset)
 
         if export_type == 'excel':
             return self._export_excel(dataset, df)

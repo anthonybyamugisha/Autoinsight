@@ -1,17 +1,27 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Nav } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
-import { FiGrid, FiUploadCloud, FiDatabase, FiBarChart2, FiFileText } from 'react-icons/fi';
+import { AuthContext } from '../context/AuthContext';
+import { FiGrid, FiUploadCloud, FiDatabase, FiBarChart2, FiFileText, FiShield } from 'react-icons/fi';
 
-const navItems = [
+const baseNavItems = [
   { path: '/dashboard', icon: FiGrid, label: 'Dashboard' },
-  { path: '/upload', icon: FiUploadCloud, label: 'Upload Data' },
   { path: '/datasets', icon: FiDatabase, label: 'Datasets' },
   { path: '/analytics', icon: FiBarChart2, label: 'Analytics' },
   { path: '/reports', icon: FiFileText, label: 'Reports' },
 ];
 
 export default function Sidebar() {
+  const { user } = useContext(AuthContext);
+
+  const navItems = [...baseNavItems];
+  if (['analyst', 'admin'].includes(user?.role)) {
+    navItems.splice(1, 0, { path: '/upload', icon: FiUploadCloud, label: 'Upload Data' });
+  }
+  if (['admin', 'assurance'].includes(user?.role)) {
+    navItems.push({ path: '/assurance', icon: FiShield, label: 'Security Assurance' });
+  }
+
   return (
     <div className="sidebar d-flex flex-column">
       <Nav className="flex-column gap-1 p-3">

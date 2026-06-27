@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Card, Spinner, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Card, Spinner, Badge, Button } from 'react-bootstrap';
 import { AuthContext } from '../context/AuthContext';
 import { datasetService } from '../services/datasets';
 import { auditService } from '../services/audit';
-import { FiDatabase, FiFile, FiHardDrive, FiActivity, FiUploadCloud, FiEye, FiTrash2, FiDownload, FiAlertCircle } from 'react-icons/fi';
+import { FiDatabase, FiFile, FiHardDrive, FiActivity, FiUploadCloud, FiEye, FiTrash2, FiDownload, FiAlertCircle, FiShield } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
 const ACTION_ICONS = {
   upload: FiUploadCloud, view: FiEye, delete: FiTrash2,
   export: FiDownload, login: FiActivity, register: FiActivity,
+  login_failed: FiAlertCircle, access_denied: FiShield,
 };
 
 export default function Dashboard() {
@@ -17,17 +18,19 @@ export default function Dashboard() {
   const [summary, setSummary] = useState(null);
   const [recentLogs, setRecentLogs] = useState([]);
   const [alertCount, setAlertCount] = useState(0);
+  const [securityCount, setSecurityCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       datasetService.summary().catch(() => null),
       auditService.getLogs().then((d) => (d.results || d).slice(0, 8)).catch(() => []),
-      auditService.getUnreadCount().then((d) => d.unread_count).catch(() => 0),
-    ]).then(([s, logs, count]) => {
+      auditService.getUnreadCount().catch(() => ({ unread_count: 0, security_count: 0 })),
+    ]).then(([s, logs, counts]) => {
       setSummary(s);
       setRecentLogs(logs);
-      setAlertCount(count);
+      setAlertCount(counts.unread_count || 0);
+      setSecurityCount(counts.security_count || 0);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -124,11 +127,21 @@ export default function Dashboard() {
               <Card.Body className="pt-0">
                 <div className="mb-3">
                   <div className="fw-bold fs-2">{alertCount}</div>
-                  <div className="text-muted small">Unread alert{alertCount > 1 ? 's' : ''} — quality issues or anomalies detected</div>
+                  <div className="text-muted small">
+                    Unread alert{alertCount > 1 ? 's' : ''}
+                    {securityCount > 0 && (
+                      <span className="text-danger"> — {securityCount} security</span>
+                    )}
+                  </div>
                 </div>
-                <button className="btn btn-outline-custom w-100 btn-sm" onClick={() => navigate('/analytics')}>
+                <button className="btn btn-outline-custom w-100 btn-sm mb-2" onClick={() => navigate('/analytics')}>
                   View Analytics
                 </button>
+                {['admin', 'assurance'].includes(user?.role) && securityCount > 0 && (
+                  <Button variant="outline-danger" size="sm" className="w-100" onClick={() => navigate('/assurance')}>
+                    <FiShield className="me-1" /> Security Assurance
+                  </Button>
+                )}
               </Card.Body>
             </Card>
           </Col>

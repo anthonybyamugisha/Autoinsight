@@ -13,7 +13,10 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'password_confirm', 'first_name', 'last_name', 'role', 'department', 'phone')
+        fields = (
+            'username', 'email', 'password', 'password_confirm',
+            'first_name', 'last_name', 'department', 'phone',
+        )
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
@@ -24,6 +27,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
         user = User(**validated_data)
+        user.role = 'analyst'
         user.set_password(password)
         user.save()
         return user
@@ -32,8 +36,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'role', 'department', 'phone', 'created_at', 'updated_at')
-        read_only_fields = ('id', 'created_at', 'updated_at')
+        fields = (
+            'id', 'username', 'email', 'first_name', 'last_name',
+            'role', 'department', 'phone', 'created_at', 'updated_at',
+        )
+        read_only_fields = ('id', 'role', 'created_at', 'updated_at')
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -51,7 +58,6 @@ class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
 
     def validate_email(self, value):
-        # Always return success to prevent email enumeration
         return value
 
 

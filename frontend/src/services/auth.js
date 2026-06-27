@@ -1,16 +1,14 @@
 import api from './api';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-
 export const authService = {
   login: async (email, password) => {
-    const { data } = await api.post(`${API_BASE_URL}/users/login/`, { email, password });
+    const { data } = await api.post('/users/login/', { email, password });
     localStorage.setItem('tokens', JSON.stringify({ access: data.access, refresh: data.refresh }));
     return data;
   },
 
   register: async (userData) => {
-    const { data } = await api.post(`${API_BASE_URL}/users/register/`, userData);
+    const { data } = await api.post('/users/register/', userData);
     localStorage.setItem('tokens', JSON.stringify(data.tokens));
     localStorage.setItem('user', JSON.stringify(data.user));
     return data;
@@ -36,12 +34,12 @@ export const authService = {
   },
 
   forgotPassword: async (email) => {
-    const { data } = await api.post(`${API_BASE_URL}/users/forgot-password/`, { email });
+    const { data } = await api.post('/users/forgot-password/', { email });
     return data;
   },
 
   resetPassword: async (uid, token, newPassword) => {
-    const { data } = await api.post(`${API_BASE_URL}/users/reset-password/`, {
+    const { data } = await api.post('/users/reset-password/', {
       uid,
       token,
       new_password: newPassword,

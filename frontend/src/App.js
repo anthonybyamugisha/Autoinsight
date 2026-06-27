@@ -17,6 +17,7 @@ import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Analytics from './pages/Analytics';
 import Reports from './pages/Reports';
+import Assurance from './pages/Assurance';
 
 function AppLayout() {
   return (
@@ -34,6 +35,7 @@ function AppLayout() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/assurance" element={<Assurance />} />
           </Routes>
         </main>
       </div>

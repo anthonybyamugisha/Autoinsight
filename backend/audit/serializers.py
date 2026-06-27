@@ -8,10 +8,14 @@ class AuditLogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AuditLog
-        fields = ('id', 'user', 'user_name', 'action', 'action_display', 'description',
-                  'resource_type', 'resource_id', 'ip_address', 'created_at')
+        fields = (
+            'id', 'user', 'user_name', 'action', 'action_display', 'description',
+            'resource_type', 'resource_id', 'ip_address', 'created_at',
+        )
 
     def get_user_name(self, obj):
+        if not obj.user:
+            return 'System'
         return obj.user.get_full_name() or obj.user.username
 
     def get_action_display(self, obj):
@@ -19,7 +23,12 @@ class AuditLogSerializer(serializers.ModelSerializer):
 
 
 class AlertSerializer(serializers.ModelSerializer):
+    alert_type_display = serializers.CharField(source='get_alert_type_display', read_only=True)
+
     class Meta:
         model = Alert
-        fields = ('id', 'dataset', 'title', 'message', 'severity', 'is_read', 'created_at')
+        fields = (
+            'id', 'alert_type', 'alert_type_display', 'user', 'dataset',
+            'title', 'message', 'severity', 'is_read', 'created_at',
+        )
         read_only_fields = ('id', 'created_at')

@@ -1,7 +1,9 @@
-from rest_framework import status, generics
+from rest_framework import status, generics, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -14,8 +16,65 @@ from .serializers import (
     RegisterSerializer, UserSerializer, ChangePasswordSerializer,
     ForgotPasswordSerializer, ResetPasswordSerializer,
 )
+from .permissions import IsAdmin
+from .security import is_login_locked, record_failed_login, clear_login_attempts
+from .throttling import LoginRateThrottle, PasswordResetRateThrottle
+from backend.audit.utils import log_action
+from backend.audit.security import on_failed_login
 
 User = get_user_model()
+
+
+class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
+    username_field = User.USERNAME_FIELD
+
+
+class LoginView(TokenObtainPairView):
+    serializer_class = EmailTokenObtainPairSerializer
+    throttle_classes = (LoginRateThrottle,)
+
+    def post(self, request, *args, **kwargs):
+        email = (request.data.get('email') or request.data.get('username') or '').strip().lower()
+        password = request.data.get('password', '')
+
+        if not email or not password:
+            return Response({'detail': 'Email and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if is_login_locked(email):
+            log_action(
+                None,
+                'login_failed',
+                f'Login attempt on locked account: {email}',
+                request=request,
+            )
+            return Response(
+                {'detail': 'Account temporarily locked due to multiple failed attempts. Try again later.'},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        serializer = self.get_serializer(data={'email': email, 'password': password})
+        try:
+            serializer.is_valid(raise_exception=True)
+        except serializers.ValidationError:
+            locked, count = record_failed_login(email)
+            log_action(
+                None,
+                'login_failed',
+                f'Failed login for {email} (attempt {count})',
+                request=request,
+            )
+            if locked:
+                on_failed_login(email, request, count)
+            return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        clear_login_attempts(email)
+        try:
+            user = User.objects.get(email=email)
+            log_action(user, 'login', f'User {email} logged in successfully', request=request)
+        except User.DoesNotExist:
+            pass
+
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
 class RegisterView(generics.CreateAPIView):
@@ -27,6 +86,7 @@ class RegisterView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+        log_action(user, 'register', f'New user registered: {user.email}', request=request)
         refresh = RefreshToken.for_user(user)
         return Response({
             'user': UserSerializer(user).data,
@@ -44,6 +104,15 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
+    def perform_update(self, serializer):
+        serializer.save()
+        log_action(
+            self.request.user,
+            'profile_update',
+            f'Profile updated for {self.request.user.email}',
+            request=self.request,
+        )
+
 
 class ChangePasswordView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -53,17 +122,24 @@ class ChangePasswordView(APIView):
         serializer.is_valid(raise_exception=True)
         request.user.set_password(serializer.validated_data['new_password'])
         request.user.save()
+        log_action(
+            request.user,
+            'password_change',
+            f'Password changed for {request.user.email}',
+            request=request,
+        )
         return Response({'message': 'Password changed successfully.'}, status=status.HTTP_200_OK)
 
 
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAdmin)
 
 
 class ForgotPasswordView(APIView):
     permission_classes = (AllowAny,)
+    throttle_classes = (PasswordResetRateThrottle,)
 
     def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
@@ -89,8 +165,14 @@ class ForgotPasswordView(APIView):
                 recipient_list=[user.email],
                 fail_silently=True,
             )
+            log_action(
+                user,
+                'password_reset_request',
+                f'Password reset requested for {email}',
+                request=request,
+            )
         except User.DoesNotExist:
-            pass  # Don't reveal whether email exists
+            pass
 
         return Response(
             {'message': 'If an account with that email exists, a reset link has been sent.'},
@@ -108,6 +190,13 @@ class ResetPasswordView(APIView):
         user = serializer.validated_data['user']
         user.set_password(serializer.validated_data['new_password'])
         user.save()
+
+        log_action(
+            user,
+            'password_change',
+            f'Password reset completed for {user.email}',
+            request=request,
+        )
 
         return Response(
             {'message': 'Password has been reset successfully. You can now sign in.'},

@@ -1,11 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { Container, Card, Table, Button, Badge, Form, InputGroup, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import { datasetService } from '../services/datasets';
 import { FiSearch, FiEye, FiTrash2, FiUploadCloud, FiDatabase } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
+const classBadge = (c) => {
+  const map = { public: 'secondary', internal: 'info', confidential: 'warning', restricted: 'danger' };
+  return <Badge bg={map[c] || 'secondary'}>{c}</Badge>;
+};
+
 export default function DatasetList() {
+  const { user } = useContext(AuthContext);
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -44,9 +51,11 @@ export default function DatasetList() {
           <h3 className="fw-bold mb-0">Datasets</h3>
           <p className="text-muted mb-0">Manage your uploaded data</p>
         </div>
-        <Button className="btn-primary-custom" onClick={() => navigate('/upload')}>
-          <FiUploadCloud className="me-2" /> Upload New
-        </Button>
+        {['analyst', 'admin'].includes(user?.role) && (
+          <Button className="btn-primary-custom" onClick={() => navigate('/upload')}>
+            <FiUploadCloud className="me-2" /> Upload New
+          </Button>
+        )}
       </div>
 
       <Card className="border-0 shadow-sm">
@@ -74,10 +83,10 @@ export default function DatasetList() {
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Classification</th>
                   <th>Uploaded By</th>
                   <th>Date</th>
                   <th>Rows</th>
-                  <th>Columns</th>
                   <th>Status</th>
                   <th className="text-end">Actions</th>
                 </tr>
@@ -87,20 +96,23 @@ export default function DatasetList() {
                   <tr key={ds.id}>
                     <td>
                       <div className="fw-semibold">{ds.name}</div>
-                      {ds.description && <small className="text-muted">{ds.description}</small>}
+                      {ds.is_expired && <Badge bg="secondary" className="me-1">Expired</Badge>}
+                      {ds.contains_sensitive_data && <Badge bg="warning" className="me-1">PII</Badge>}
                     </td>
+                    <td>{classBadge(ds.classification)}</td>
                     <td>{ds.uploaded_by_name || ds.uploaded_by}</td>
                     <td>{new Date(ds.uploaded_at).toLocaleDateString()}</td>
                     <td>{ds.row_count.toLocaleString()}</td>
-                    <td>{ds.column_count}</td>
                     <td>{statusBadge(ds.status)}</td>
                     <td className="text-end">
                       <Button variant="outline-primary" size="sm" className="me-1" onClick={() => navigate(`/datasets/${ds.id}`)}>
                         <FiEye />
                       </Button>
-                      <Button variant="outline-danger" size="sm" onClick={() => handleDelete(ds.id, ds.name)}>
-                        <FiTrash2 />
-                      </Button>
+                      {user?.role !== 'assurance' && (
+                        <Button variant="outline-danger" size="sm" onClick={() => handleDelete(ds.id, ds.name)}>
+                          <FiTrash2 />
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}

@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Card, Table, Button, Badge, Row, Col, Spinner, Nav, ProgressBar } from 'react-bootstrap';
+import React, { useState, useEffect, useContext } from 'react';
+import { Container, Card, Table, Button, Badge, Row, Col, Spinner, Nav, ProgressBar, Alert } from 'react-bootstrap';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement,
   Title, Tooltip, Legend,
 } from 'chart.js';
 import { useParams, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import { datasetService } from '../services/datasets';
 import { FiArrowLeft, FiTrash2, FiDownload, FiDatabase, FiBarChart2, FiShield, FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
 import { toast } from 'react-toastify';
@@ -16,6 +17,7 @@ const CHART_COLORS = ['#0055BB', '#FFE600', '#D32F2F', '#16A34A', '#0EA5E9', '#F
 
 export default function DatasetDetail() {
   const { id } = useParams();
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [activeTab, setActiveTab] = useState('preview');
@@ -66,7 +68,9 @@ export default function DatasetDetail() {
   if (loading) return <div className="text-center py-5"><Spinner animation="border" /></div>;
   if (!data) return null;
 
-  const { dataset, columns, records, total_rows } = data;
+  const { dataset, columns, records, total_rows, masked } = data;
+  const canExport = user?.role !== 'assurance';
+  const classColor = { public: 'secondary', internal: 'info', confidential: 'warning', restricted: 'danger' };
 
   const buildQualityChart = () => {
     if (!quality) return null;
@@ -105,27 +109,39 @@ export default function DatasetDetail() {
           {dataset.description && <p className="text-muted mb-0">{dataset.description}</p>}
         </div>
         <div className="d-flex gap-2">
-          <Button variant="outline-primary" size="sm" disabled={exporting} onClick={() => handleExport('excel')}>
-            {exporting ? <Spinner size="sm" animation="border" /> : <><FiDownload className="me-1" /> Excel</>}
-          </Button>
-          <Button variant="outline-danger" size="sm" disabled={exporting} onClick={() => handleExport('pdf')}>
-            {exporting ? <Spinner size="sm" animation="border" /> : <><FiDownload className="me-1" /> PDF</>}
-          </Button>
-          <Button variant="outline-danger" size="sm" onClick={handleDelete}>
-            <FiTrash2 className="me-1" /> Delete
-          </Button>
+          {canExport && (
+            <>
+              <Button variant="outline-primary" size="sm" disabled={exporting} onClick={() => handleExport('excel')}>
+                {exporting ? <Spinner size="sm" animation="border" /> : <><FiDownload className="me-1" /> Excel</>}
+              </Button>
+              <Button variant="outline-danger" size="sm" disabled={exporting} onClick={() => handleExport('pdf')}>
+                {exporting ? <Spinner size="sm" animation="border" /> : <><FiDownload className="me-1" /> PDF</>}
+              </Button>
+            </>
+          )}
+          {user?.role !== 'assurance' && (
+            <Button variant="outline-danger" size="sm" onClick={handleDelete}>
+              <FiTrash2 className="me-1" /> Delete
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Metadata Cards */}
+      {masked && (
+        <Alert variant="warning" className="mb-3 py-2 small">
+          Sensitive values are masked in this preview per data classification policy.
+        </Alert>
+      )}
+
       <Row className="g-3 mb-4">
         {[
+          { label: 'Classification', value: <Badge bg={classColor[dataset.classification] || 'secondary'}>{dataset.classification_display || dataset.classification}</Badge> },
           { label: 'Status', value: <Badge bg="success">{dataset.status}</Badge> },
           { label: 'Total Rows', value: total_rows.toLocaleString() },
-          { label: 'Columns', value: dataset.column_count },
-          { label: 'Uploaded', value: new Date(dataset.uploaded_at).toLocaleDateString() },
+          { label: 'Retention', value: dataset.retention_expires_at ? new Date(dataset.retention_expires_at).toLocaleDateString() : `${dataset.retention_days} days` },
           { label: 'Uploaded By', value: dataset.uploaded_by_name },
-          { label: 'File Size', value: (dataset.file_size / 1024).toFixed(1) + ' KB' },
+          { label: 'Sensitive Data', value: dataset.contains_sensitive_data ? <Badge bg="warning">Detected</Badge> : <Badge bg="success">None flagged</Badge> },
         ].map(({ label, value }) => (
           <Col key={label} sm={6} md={4} lg={2}>
             <Card className="border-0 shadow-sm h-100">

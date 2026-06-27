@@ -1,11 +1,78 @@
 import pandas as pd
 import numpy as np
-import io
 import os
+import re
 
 
 # Max rows to store in DB for preview; full data stays in the saved file
 MAX_DB_ROWS = int(os.environ.get('MAX_DB_ROWS', 50000))
+
+SENSITIVE_COLUMN_PATTERNS = [
+    re.compile(r'nin|national.?id|ssn|passport|id.?number', re.I),
+    re.compile(r'account|acct|iban|card.?number', re.I),
+    re.compile(r'phone|mobile|msisdn|tel', re.I),
+    re.compile(r'email|e-?mail', re.I),
+    re.compile(r'salary|income|balance', re.I),
+]
+
+VALUE_PATTERNS = [
+    re.compile(r'^\+?\d{10,15}$'),
+    re.compile(r'^\d{10,16}$'),
+]
+
+
+def scan_sensitive_data(df):
+    """Detect columns likely containing PII based on names and sample values."""
+    sensitive_columns = []
+    for col in df.columns:
+        col_str = str(col)
+        if any(p.search(col_str) for p in SENSITIVE_COLUMN_PATTERNS):
+            sensitive_columns.append(col_str)
+            continue
+        sample = df[col].dropna().head(100).astype(str)
+        for val in sample:
+            if any(p.match(val.strip()) for p in VALUE_PATTERNS):
+                sensitive_columns.append(col_str)
+                break
+    unique = list(dict.fromkeys(sensitive_columns))
+    return {'sensitive_columns': unique, 'contains_pii': bool(unique)}
+
+
+def validate_classification(classification, scan_result):
+    """Reject misclassified uploads that contain detected sensitive data."""
+    if scan_result['contains_pii'] and classification in ('public', 'internal'):
+        cols = ', '.join(scan_result['sensitive_columns'][:5])
+        raise ValueError(
+            f'Sensitive data detected in columns: {cols}. '
+            'Classify as Confidential or Restricted.'
+        )
+
+
+def mask_value(val):
+    if val is None:
+        return None
+    s = str(val)
+    if len(s) <= 4:
+        return '****'
+    return '****' + s[-4:]
+
+
+def mask_record_data(data, sensitive_columns):
+    if not sensitive_columns:
+        return data
+    sensitive_set = set(sensitive_columns)
+    return {
+        k: mask_value(v) if k in sensitive_set and v is not None else v
+        for k, v in data.items()
+    }
+
+
+def should_mask_preview(user, dataset):
+    if user.role == 'admin':
+        return False
+    if dataset.classification in ('confidential', 'restricted'):
+        return True
+    return bool(dataset.sensitive_columns)
 
 
 def process_uploaded_file(file_obj):
@@ -80,12 +147,15 @@ def process_uploaded_file(file_obj):
         for i, row in enumerate(capped_dicts)
     ]
 
+    sensitivity = scan_sensitive_data(df)
+
     return {
         'columns': columns,
         'row_count': total_rows,
         'column_count': len(columns),
         'records': records,
         'records_capped': total_rows > MAX_DB_ROWS,
+        'sensitivity': sensitivity,
     }
 
 

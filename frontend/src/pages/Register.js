@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 export default function Register() {
   const [form, setForm] = useState({
     username: '', email: '', password: '', password_confirm: '',
-    first_name: '', last_name: '', role: 'analyst', department: '', phone: '',
+    first_name: '', last_name: '', department: '', phone: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -108,22 +108,12 @@ export default function Register() {
                   </Row>
 
                   <Row>
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label className="small fw-semibold">Role</Form.Label>
-                        <Form.Select name="role" value={form.role} onChange={handleChange}>
-                          <option value="analyst">Analyst</option>
-                          <option value="manager">Manager</option>
-                          <option value="admin">Admin</option>
-                        </Form.Select>
-                      </Form.Group>
-                    </Col>
-                    <Col md={6}>
+                    <Col md={12}>
                       <Form.Group className="mb-3">
                         <Form.Label className="small fw-semibold">Department</Form.Label>
                         <div className="input-icon-wrapper">
                           <FiBriefcase className="input-icon" />
-                          <Form.Control name="department" value={form.department} onChange={handleChange} className="ps-5" placeholder="e.g. QA" />
+                          <Form.Control name="department" value={form.department} onChange={handleChange} className="ps-5" placeholder="e.g. Security Assurance" required />
                         </div>
                       </Form.Group>
                     </Col>

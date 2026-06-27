@@ -1,20 +1,23 @@
 import api from './api';
 
 export const auditService = {
-  // Audit logs
   getLogs: async (params = {}) => {
     const { data } = await api.get('/audit/logs/', { params });
     return data;
   },
 
-  // Alerts
-  getAlerts: async () => {
-    const { data } = await api.get('/audit/alerts/');
+  getAlerts: async (params = {}) => {
+    const { data } = await api.get('/audit/alerts/', { params });
     return data;
   },
 
   getUnreadCount: async () => {
     const { data } = await api.get('/audit/alerts/unread-count/');
+    return data;
+  },
+
+  getSecuritySummary: async (days = 7) => {
+    const { data } = await api.get('/audit/security-summary/', { params: { days } });
     return data;
   },
 
