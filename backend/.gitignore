@@ -6,6 +6,7 @@ __pycache__/
 
 # Django
 db.sqlite3
+qlite3
 db.sqlite3-journal
 media/
 

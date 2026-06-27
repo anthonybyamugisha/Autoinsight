@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Form, Badge, Table, Spinner, ProgressBar } from 'react-bootstrap';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Container, Row, Col, Card, Form, Badge, Spinner, Table, ProgressBar } from 'react-bootstrap';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -7,10 +7,10 @@ import {
   ArcElement, Title, Tooltip, Legend, Filler,
 } from 'chart.js';
 import { datasetService } from '../services/datasets';
-import { FiBarChart2, FiAlertTriangle, FiCheckCircle, FiActivity, FiTrendingUp } from 'react-icons/fi';
+import { FiBarChart2, FiAlertTriangle, FiCheckCircle, FiActivity, FiTrendingUp, FiDatabase, FiColumns } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { PageTransition, Skeleton, CountUp } from '../components/PageTransition';
 
-// Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, Filler);
 
 const CHART_COLORS = ['#0055BB', '#FFE600', '#D32F2F', '#16A34A', '#0EA5E9', '#F59E0B', '#8B5CF6', '#EC4899'];
@@ -25,7 +25,6 @@ export default function Analytics() {
   const [loading, setLoading] = useState(false);
   const [loadingList, setLoadingList] = useState(true);
 
-  // Load dataset list
   useEffect(() => {
     datasetService.list()
       .then((data) => {
@@ -36,12 +35,10 @@ export default function Analytics() {
       .finally(() => setLoadingList(false));
   }, []);
 
-  // Load analytics for selected dataset
   useEffect(() => {
     if (!selectedId) return;
     setLoading(true);
     setAnalytics(null); setTrends(null); setQuality(null); setAnomalies(null);
-
     Promise.all([
       datasetService.analytics(selectedId).catch(() => null),
       datasetService.trends(selectedId).catch(() => null),
@@ -107,6 +104,21 @@ export default function Analytics() {
         data: anomalies.anomalies.map(a => a.anomaly_pct),
         backgroundColor: anomalies.anomalies.map((_, i) => CHART_COLORS[i % CHART_COLORS.length] + '40'),
         borderColor: anomalies.anomalies.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
+        borderWidth: 2,
+        borderRadius: 6,
+      }],
+    };
+  };
+
+  const buildNullChart = () => {
+    if (!quality?.column_quality?.length) return null;
+    return {
+      labels: quality.column_quality.map(cq => cq.column),
+      datasets: [{
+        label: 'Null %',
+        data: quality.column_quality.map(cq => cq.null_pct),
+        backgroundColor: quality.column_quality.map((_, i) => CHART_COLORS[i % CHART_COLORS.length] + '80'),
+        borderColor: quality.column_quality.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
         borderWidth: 2,
         borderRadius: 6,
       }],
@@ -186,8 +198,9 @@ export default function Analytics() {
               { label: 'Columns', value: analytics?.total_columns || '-', icon: FiActivity, color: 'var(--info)' },
               { label: 'Quality Score', value: quality ? `${quality.quality_score}/100` : '-', icon: FiCheckCircle, color: 'var(--success)' },
               { label: 'Anomalies', value: anomalies?.total_anomalies || '0', icon: FiAlertTriangle, color: 'var(--warning)' },
+              { label: 'Columns with Anomalies', value: anomalies?.columns_with_anomalies || '0', icon: FiColumns, color: 'var(--danger)' },
             ].map(({ label, value, icon: Icon, color }) => (
-              <Col key={label} sm={6} lg={3}>
+              <Col key={label} sm={6} lg={2}>
                 <Card className="kpi-card border-0 shadow-sm h-100">
                   <Card.Body className="d-flex align-items-center gap-3">
                     <div className="kpi-icon" style={{ backgroundColor: color + '15', color }}><Icon size={22} /></div>
