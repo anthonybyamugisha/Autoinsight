@@ -1,39 +1,23 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
-class IsAdmin(BasePermission):
+class IsManager(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == 'admin'
+        return request.user.is_authenticated and request.user.role == 'manager'
 
 
-class IsAdminOrAssurance(BasePermission):
+class IsAnalystOrManager(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role in ('admin', 'assurance')
+        return request.user.is_authenticated and request.user.role in ('analyst', 'manager')
 
 
-class IsAnalystOrAdmin(BasePermission):
+class IsManagerOrAnalyst(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role in ('analyst', 'admin')
+        return request.user.is_authenticated and request.user.role in ('manager', 'analyst')
 
 
-class IsManagerOrAdmin(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role in ('manager', 'admin')
-
-
-class IsNotAssurance(BasePermission):
-    """Block write operations for read-only assurance role."""
-
-    def has_permission(self, request, view):
-        if not request.user.is_authenticated:
-            return False
-        if request.user.role == 'assurance' and request.method not in SAFE_METHODS:
-            return False
-        return True
-
-
-class IsOwnerOrAdmin(BasePermission):
+class IsOwnerOrManager(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if request.user.role == 'admin':
+        if request.user.role == 'manager':
             return True
         return obj.uploaded_by == request.user

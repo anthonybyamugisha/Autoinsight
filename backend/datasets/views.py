@@ -17,7 +17,7 @@ from .utils import (
 from .access import (
     datasets_for_user, get_accessible_dataset, apply_retention_expiry,
 )
-from backend.users.permissions import IsAnalystOrAdmin, IsNotAssurance
+from backend.users.permissions import IsAnalystOrManager
 from backend.users.throttling import UploadRateThrottle
 from backend.audit.utils import log_action
 from backend.audit.security import on_restricted_upload
@@ -26,7 +26,7 @@ MAX_UPLOAD_SIZE = int(os.environ.get('MAX_UPLOAD_SIZE_MB', 500)) * 1024 * 1024
 
 
 class DatasetUploadView(APIView):
-    permission_classes = (IsAuthenticated, IsAnalystOrAdmin, IsNotAssurance)
+    permission_classes = (IsAuthenticated, IsAnalystOrManager)
     parser_classes = (MultiPartParser, FormParser)
     throttle_classes = (UploadRateThrottle,)
 

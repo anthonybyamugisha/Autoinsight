@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import AuditLog, Alert
 from .serializers import AuditLogSerializer, AlertSerializer
-from backend.users.permissions import IsAdminOrAssurance
+from backend.users.permissions import IsAnalystOrManager
 from backend.datasets.access import datasets_for_user
 
 

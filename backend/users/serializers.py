@@ -10,12 +10,13 @@ User = get_user_model()
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password_confirm = serializers.CharField(write_only=True, required=True)
+    role = serializers.ChoiceField(choices=[(k, l) for k, l in User.ROLE_CHOICES if k != 'assurance'], required=False, default='analyst')
 
     class Meta:
         model = User
         fields = (
-            'username', 'email', 'password', 'password_confirm',
-            'first_name', 'last_name', 'department', 'phone',
+            'email', 'password', 'password_confirm',
+            'first_name', 'last_name', 'role', 'department', 'phone',
         )
 
     def validate(self, attrs):
@@ -26,8 +27,8 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
-        user = User(**validated_data)
-        user.role = 'analyst'
+        role = validated_data.pop('role', 'analyst')
+        user = User(**validated_data, role=role)
         user.set_password(password)
         user.save()
         return user

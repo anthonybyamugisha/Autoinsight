@@ -16,7 +16,7 @@ from .access import get_accessible_dataset
 from backend.audit.utils import log_action
 from backend.audit.models import Alert
 from backend.audit.security import check_bulk_export
-from backend.users.permissions import IsNotAssurance
+from backend.users.permissions import IsAnalystOrManager
 
 
 # ===== ANALYTICS ENGINE =====
@@ -330,7 +330,7 @@ class DatasetAnomalyView(APIView):
 
 class ReportExportView(APIView):
     """Export dataset report as PDF or Excel."""
-    permission_classes = (IsAuthenticated, IsNotAssurance)
+    permission_classes = (IsAuthenticated, IsAnalystOrManager)
 
     def get(self, request, pk):
         dataset = get_accessible_dataset(request.user, pk, request, permission='export')

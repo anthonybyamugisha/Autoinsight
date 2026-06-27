@@ -17,7 +17,7 @@ from .serializers import (
     RegisterSerializer, UserSerializer, ChangePasswordSerializer,
     ForgotPasswordSerializer, ResetPasswordSerializer,
 )
-from .permissions import IsAdmin
+from .permissions import IsManager
 from .security import is_login_locked, record_failed_login, clear_login_attempts
 from .throttling import LoginRateThrottle, PasswordResetRateThrottle
 from backend.audit.utils import log_action
@@ -139,7 +139,7 @@ class ChangePasswordView(APIView):
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated, IsAdmin)
+    permission_classes = (IsAuthenticated, IsManager)
 
 
 class ForgotPasswordView(APIView):

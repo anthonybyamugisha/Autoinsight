@@ -1,15 +1,17 @@
 import React, { useState, useContext } from 'react';
-import { Form, Button, Card, Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
+import { Form, Button, Card, Container, Row, Col, Alert, Spinner, InputGroup } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FiUserPlus, FiMail, FiLock, FiUser, FiBriefcase } from 'react-icons/fi';
+import { FiUserPlus, FiMail, FiLock, FiEye, FiEyeOff, FiBriefcase, FiShield } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
 export default function Register() {
   const [form, setForm] = useState({
-    username: '', email: '', password: '', password_confirm: '',
-    first_name: '', last_name: '', department: '', phone: '',
+    email: '', password: '', password_confirm: '',
+    first_name: '', last_name: '', role: 'analyst', department: '', phone: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useContext(AuthContext);
@@ -71,14 +73,6 @@ export default function Register() {
                   </Row>
 
                   <Form.Group className="mb-3">
-                    <Form.Label className="small fw-semibold">Username</Form.Label>
-                    <div className="input-icon-wrapper">
-                      <FiUser className="input-icon" />
-                      <Form.Control name="username" value={form.username} onChange={handleChange} className="ps-5" required />
-                    </div>
-                  </Form.Group>
-
-                  <Form.Group className="mb-3">
                     <Form.Label className="small fw-semibold">Email</Form.Label>
                     <div className="input-icon-wrapper">
                       <FiMail className="input-icon" />
@@ -92,7 +86,10 @@ export default function Register() {
                         <Form.Label className="small fw-semibold">Password</Form.Label>
                         <div className="input-icon-wrapper">
                           <FiLock className="input-icon" />
-                          <Form.Control type="password" name="password" value={form.password} onChange={handleChange} className="ps-5" required />
+                          <Form.Control type={showPassword ? 'text' : 'password'} name="password" value={form.password} onChange={handleChange} className="ps-5 pe-5" required />
+                          <Button variant="light" className="password-toggle border-0" type="button" onClick={() => setShowPassword(!showPassword)}>
+                            {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                          </Button>
                         </div>
                       </Form.Group>
                     </Col>
@@ -101,14 +98,30 @@ export default function Register() {
                         <Form.Label className="small fw-semibold">Confirm Password</Form.Label>
                         <div className="input-icon-wrapper">
                           <FiLock className="input-icon" />
-                          <Form.Control type="password" name="password_confirm" value={form.password_confirm} onChange={handleChange} className="ps-5" required />
+                          <Form.Control type={showConfirm ? 'text' : 'password'} name="password_confirm" value={form.password_confirm} onChange={handleChange} className="ps-5 pe-5" required />
+                          <Button variant="light" className="password-toggle border-0" type="button" onClick={() => setShowConfirm(!showConfirm)}>
+                            {showConfirm ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                          </Button>
                         </div>
                       </Form.Group>
                     </Col>
                   </Row>
 
                   <Row>
-                    <Col md={12}>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label className="small fw-semibold">Role</Form.Label>
+                        <div className="input-icon-wrapper">
+                          <FiShield className="input-icon" />
+                          <Form.Select name="role" value={form.role} onChange={handleChange} className="ps-5">
+                            <option value="analyst">Analyst</option>
+                            <option value="manager">Manager</option>
+                            <option value="admin">Admin</option>
+                          </Form.Select>
+                        </div>
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
                       <Form.Group className="mb-3">
                         <Form.Label className="small fw-semibold">Department</Form.Label>
                         <div className="input-icon-wrapper">
@@ -119,7 +132,7 @@ export default function Register() {
                     </Col>
                   </Row>
 
-                  <Button type="submit" className="w-100 btn-primary-custom mt-2" disabled={loading}>
+                  <Button type="submit" className="w-100 btn-primary-custom btn-press" disabled={loading}>
                     {loading ? <Spinner size="sm" animation="border" /> : <><FiUserPlus className="me-2" /> Create Account</>}
                   </Button>
                 </Form>
