@@ -4,14 +4,14 @@ import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, BarElement, PointElement, LineElement,
-  ArcElement, Title, Tooltip as ChartTooltip, Legend, Filler,
+  ArcElement, Title, Tooltip, Legend, Filler,
 } from 'chart.js';
 import { datasetService } from '../services/datasets';
 import { FiBarChart2, FiAlertTriangle, FiCheckCircle, FiActivity, FiTrendingUp, FiDatabase, FiColumns, FiDownload, FiInfo, FiFilter, FiTable } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { PageTransition, Skeleton, CountUp } from '../components/PageTransition';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, ArcElement, Title, ChartTooltip, Legend, Filler);
+ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, Filler);
 
 const CHART_COLORS = ['#0055BB', '#FFE600', '#D32F2F', '#16A34A', '#0EA5E9', '#F59E0B', '#8B5CF6', '#EC4899'];
 
@@ -78,6 +78,13 @@ export default function Analytics() {
   const [anomalies, setAnomalies] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingList, setLoadingList] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const [nullThreshold, setNullThreshold] = useState(100);
+  const [anomalyThreshold, setAnomalyThreshold] = useState(0);
+  const [selectedColumn, setSelectedColumn] = useState(null);
+  const [selectedDatasetName, setSelectedDatasetName] = useState('');
+
+  const debouncedSelectedId = useDebounce(selectedId, 250);
 
   useEffect(() => {
     datasetService.list()
@@ -90,20 +97,40 @@ export default function Analytics() {
   }, []);
 
   useEffect(() => {
-    if (!selectedId) return;
+    if (!debouncedSelectedId) return;
     setLoading(true);
     setAnalytics(null); setTrends(null); setQuality(null); setAnomalies(null);
     Promise.all([
-      datasetService.analytics(selectedId).catch(() => null),
-      datasetService.trends(selectedId).catch(() => null),
-      datasetService.quality(selectedId).catch(() => null),
-      datasetService.anomalies(selectedId).catch(() => null),
+      datasetService.analytics(debouncedSelectedId).catch(() => null),
+      datasetService.trends(debouncedSelectedId).catch(() => null),
+      datasetService.quality(debouncedSelectedId).catch(() => null),
+      datasetService.anomalies(debouncedSelectedId).catch(() => null),
     ]).then(([a, t, q, an]) => {
       setAnalytics(a);
       setTrends(t);
       setQuality(q);
       setAnomalies(an);
     }).finally(() => setLoading(false));
+  }, [debouncedSelectedId]);
+
+  const handleDatasetChange = useCallback((e) => {
+    const id = e.target.value;
+    setSelectedId(id);
+    const ds = datasets.find((d) => String(d.id) === String(id));
+    setSelectedDatasetName(ds ? ds.name : '');
+  }, [datasets]);
+
+  const handleExport = useCallback(async (type) => {
+    if (!selectedId) return;
+    setExporting(true);
+    try {
+      await datasetService.export(selectedId, type);
+      toast.success(`${type.toUpperCase()} report downloaded`);
+    } catch (e) {
+      toast.error('Export failed');
+    } finally {
+      setExporting(false);
+    }
   }, [selectedId]);
 
   // Chart data builders
@@ -179,6 +206,27 @@ export default function Analytics() {
     };
   };
 
+  const filteredColumnQuality = useMemo(() => {
+    if (!quality?.column_quality) return [];
+    return quality.column_quality.filter((cq) => {
+      const belowNull = cq.null_pct <= nullThreshold;
+      const aboveAnomaly = (cq.outlier_count || 0) >= anomalyThreshold;
+      return belowNull && aboveAnomaly;
+    });
+  }, [quality, nullThreshold, anomalyThreshold]);
+
+  const filteredAnomalies = useMemo(() => {
+    if (!anomalies?.anomalies) return [];
+    return anomalies.anomalies.filter((a) => (a.anomaly_pct || 0) >= anomalyThreshold);
+  }, [anomalies, anomalyThreshold]);
+
+  const filteredColumnsStats = useMemo(() => {
+    if (!analytics?.columns) return [];
+    const entries = Object.entries(analytics.columns);
+    if (!selectedColumn) return entries;
+    return entries.filter(([name]) => name === selectedColumn);
+  }, [analytics, selectedColumn]);
+
   const chartOptions = (title) => ({
     responsive: true,
     maintainAspectRatio: false,
@@ -246,7 +294,7 @@ export default function Analytics() {
       {selectedId && !loading && (
         <>
           {/* KPI Overview */}
-          <Row className="g-3 mb-4 justify-content-between">
+          <Row className="g-3 mb-4">
             {[
               { label: 'Total Rows', value: analytics?.total_rows?.toLocaleString() || '-', icon: FiBarChart2, color: 'var(--primary)' },
               { label: 'Columns', value: analytics?.total_columns || '-', icon: FiActivity, color: 'var(--info)' },
@@ -254,13 +302,13 @@ export default function Analytics() {
               { label: 'Anomalies', value: anomalies?.total_anomalies || '0', icon: FiAlertTriangle, color: 'var(--warning)' },
               { label: 'Columns with Anomalies', value: anomalies?.columns_with_anomalies || '0', icon: FiColumns, color: 'var(--danger)' },
             ].map(({ label, value, icon: Icon, color }) => (
-              <Col key={label} sm={6} lg={2} className="d-flex">
-                <Card className="kpi-card border-0 shadow-sm flex-fill">
-                  <Card.Body className="d-flex flex-column align-items-center text-center gap-2">
-                    <div className="kpi-icon" style={{ backgroundColor: color + '15', color }}><Icon size={24} /></div>
+              <Col key={label} sm={6} lg={2}>
+                <Card className="kpi-card border-0 shadow-sm h-100">
+                  <Card.Body className="d-flex align-items-center gap-3">
+                    <div className="kpi-icon" style={{ backgroundColor: color + '15', color }}><Icon size={22} /></div>
                     <div>
                       <div className="text-muted small">{label}</div>
-                      <div className="fw-bold fs-4">{value}</div>
+                      <div className="fw-bold fs-5">{value}</div>
                     </div>
                   </Card.Body>
                 </Card>
@@ -268,29 +316,26 @@ export default function Analytics() {
             ))}
           </Row>
 
-          {/* Charts Row 1 */}
-          <Row className="g-4 mb-4">
-            {/* Trends Chart */}
-            {trends && (
-              <Col lg={8}>
-                <Card className="border-0 shadow-sm h-100">
-                  <Card.Header className="bg-white border-0 py-3 d-flex align-items-center gap-2">
-                    <FiTrendingUp /> <span className="fw-semibold">Trends — {trends.value_column} by {trends.group_by}</span>
-                  </Card.Header>
-                  <Card.Body style={{ height: 300 }}>
-                    <Line data={buildTrendChart()} options={trendChartOptions} />
-                  </Card.Body>
-                </Card>
-              </Col>
-            )}
+          {/* Trend Chart */}
+          {trends && (
+            <Card className="border-0 shadow-sm mb-4">
+              <Card.Header className="bg-white border-0 py-3 d-flex align-items-center gap-2">
+                <FiTrendingUp /> <span className="fw-semibold">Trends — {trends.value_column} by {trends.group_by}</span>
+              </Card.Header>
+              <Card.Body style={{ height: 320 }}>
+                <Line data={buildTrendChart()} options={trendChartOptions} />
+              </Card.Body>
+            </Card>
+          )}
 
-            {/* Data Quality Doughnut */}
+          <Row className="g-4 mb-4">
+            {/* Quality Doughnut */}
             {quality && (
-              <Col lg={trends ? 4 : 12}>
+              <Col lg={4}>
                 <Card className="border-0 shadow-sm h-100">
                   <Card.Header className="bg-white border-0 py-3 fw-semibold">Data Quality</Card.Header>
-                  <Card.Body className="d-flex flex-column align-items-center justify-content-center">
-                    <div style={{ height: 160, width: 160 }}>
+                  <Card.Body className="d-flex flex-column align-items-center">
+                    <div style={{ height: 180, width: 180 }}>
                       <Doughnut data={buildQualityChart()} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }} />
                     </div>
                     <div className="text-center mt-3">
@@ -303,19 +348,16 @@ export default function Analytics() {
                 </Card>
               </Col>
             )}
-          </Row>
 
-          {/* Charts Row 2 */}
-          <Row className="g-4 mb-4">
-            {/* Anomaly Detection Bar Chart */}
+            {/* Anomaly Bar Chart */}
             {anomalies && anomalies.anomalies?.length > 0 && (
-              <Col lg={6}>
+              <Col lg={quality ? 8 : 12}>
                 <Card className="border-0 shadow-sm h-100">
                   <Card.Header className="bg-white border-0 py-3 d-flex align-items-center gap-2">
                     <FiAlertTriangle /> <span className="fw-semibold">Anomaly Detection</span>
                     <Badge bg="warning" className="ms-auto">{anomalies.columns_with_anomalies} columns</Badge>
                   </Card.Header>
-                  <Card.Body style={{ height: 260 }}>
+                  <Card.Body style={{ height: 220 }}>
                     <Bar data={buildAnomalyChart()} options={chartOptions()} />
                   </Card.Body>
                 </Card>
@@ -323,27 +365,14 @@ export default function Analytics() {
             )}
 
             {anomalies && anomalies.anomalies?.length === 0 && (
-              <Col lg={6}>
+              <Col lg={quality ? 8 : 12}>
                 <Card className="border-0 shadow-sm h-100">
-                  <Card.Header className="bg-white border-0 py-3 fw-semibold">Anomaly Detection</Card.Header>
-                  <Card.Body className="d-flex align-items-center justify-content-center" style={{ height: 260 }}>
-                    <div className="text-center text-muted">
-                      <FiCheckCircle size={36} className="mb-2 text-success" />
-                      <div className="fw-semibold">No Anomalies Detected</div>
-                      <div className="small">All numeric columns are within expected ranges</div>
+                  <Card.Body className="d-flex align-items-center justify-content-center gap-3 py-5">
+                    <FiCheckCircle size={32} className="text-success" />
+                    <div>
+                      <h5 className="fw-bold mb-0 text-success">No Anomalies Detected</h5>
+                      <p className="text-muted small mb-0">All numeric columns are within expected ranges.</p>
                     </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            )}
-
-            {/* Null % by Column Chart */}
-            {quality?.column_quality?.length > 0 && (
-              <Col lg={anomalies ? 6 : 12}>
-                <Card className="border-0 shadow-sm h-100">
-                  <Card.Header className="bg-white border-0 py-3 fw-semibold">Null % by Column</Card.Header>
-                  <Card.Body style={{ height: 260 }}>
-                    <Bar data={buildNullChart()} options={chartOptions()} />
                   </Card.Body>
                 </Card>
               </Col>
