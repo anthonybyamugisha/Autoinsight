@@ -61,12 +61,12 @@ export default function Landing() {
       {/* Hero */}
       <section className="landing-hero">
         <div className="landing-container text-center">
-          <div className="hero-badge">Centenary Bank — Quality Assurance</div>
-          <h1 className="hero-title">
+          <div className="hero-badge hero-fade-up hero-fade-up-delay-1">Centenary Bank — Quality Assurance</div>
+          <h1 className="hero-title hero-fade-up hero-fade-up-delay-2">
             Business Intelligence<br />
             <span className="hero-highlight">&amp; Analytics Platform</span>
           </h1>
-          <p className="hero-subtitle">
+          <p className="hero-subtitle hero-fade-up hero-fade-up-delay-3">
             Upload any dataset and get instant analytics, data quality scores,
             anomaly detection, and professional reports — no data science degree required.
           </p>
@@ -92,8 +92,8 @@ export default function Landing() {
             </p>
           </div>
           <div className="features-grid">
-            {features.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="feature-card">
+            {features.map(({ icon: Icon, title, desc }, idx) => (
+              <div key={title} className={`feature-card feature-card-entrance stagger-item-delay-${Math.min(idx + 1, 8)}`}>
                 <div className="feature-icon"><Icon size={22} /></div>
                 <h5 className="feature-title">{title}</h5>
                 <p className="feature-desc text-muted">{desc}</p>

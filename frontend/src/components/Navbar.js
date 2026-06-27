@@ -63,7 +63,7 @@ export default function Navbar() {
                 )}
                 {unreadCount === 0 && <span className="notification-dot"></span>}
               </Dropdown.Toggle>
-              <Dropdown.Menu className="dropdown-menu-end shadow notification-dropdown" style={{ minWidth: 340 }}>
+              <Dropdown.Menu className="dropdown-menu-end shadow notification-dropdown notification-dropdown" style={{ minWidth: 340 }}>
                 <div className="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
                   <Dropdown.Header className="p-0">Alerts</Dropdown.Header>
                   {unreadCount > 0 && (

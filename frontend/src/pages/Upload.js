@@ -192,10 +192,10 @@ export default function Upload() {
                 {uploading && <ProgressBar now={progress} label={`${progress}%`} className="mb-3" animated />}
 
                 <div className="d-flex gap-2">
-                  <Button type="submit" className="btn-primary-custom flex-grow-1" disabled={!file || uploading}>
+                  <Button type="submit" className="btn-primary-custom btn-press flex-grow-1" disabled={!file || uploading}>
                     {uploading ? 'Uploading...' : <><FiUploadCloud className="me-2" /> Upload & Process</>}
                   </Button>
-                  <Button variant="outline-secondary" onClick={() => navigate('/datasets')}>Cancel</Button>
+                  <Button variant="outline-secondary" className="btn-press" onClick={() => navigate('/datasets')}>Cancel</Button>
                 </div>
               </Form>
             </Card.Body>

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Card, Spinner, Badge, Button } from 'react-bootstrap';
+import { Container, Row, Col, Card, Badge, Button } from 'react-bootstrap';
 import { AuthContext } from '../context/AuthContext';
 import { datasetService } from '../services/datasets';
 import { auditService } from '../services/audit';
 import { FiDatabase, FiFile, FiHardDrive, FiActivity, FiUploadCloud, FiEye, FiTrash2, FiDownload, FiAlertCircle, FiShield } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import { CountUp, Skeleton } from '../components/PageTransition';
 
 const ACTION_ICONS = {
   upload: FiUploadCloud, view: FiEye, delete: FiTrash2,
@@ -35,10 +36,10 @@ export default function Dashboard() {
   }, []);
 
   const kpiCards = [
-    { icon: FiDatabase, label: 'Total Datasets', value: summary?.total_datasets || 0, color: 'var(--primary)' },
-    { icon: FiFile, label: 'Total Records', value: summary?.total_records?.toLocaleString() || 0, color: 'var(--success)' },
-    { icon: FiHardDrive, label: 'Storage Used', value: formatSize(summary?.total_file_size || 0), color: 'var(--warning)' },
-    { icon: FiAlertCircle, label: 'Alerts', value: alertCount, color: alertCount > 0 ? 'var(--accent)' : 'var(--info)' },
+    { icon: FiDatabase, label: 'Total Datasets', value: summary?.total_datasets ?? 0, color: 'var(--primary)', raw: summary?.total_datasets ?? 0 },
+    { icon: FiFile, label: 'Total Records', value: summary?.total_records?.toLocaleString() || '0', color: 'var(--success)', raw: summary?.total_records ?? 0 },
+    { icon: FiHardDrive, label: 'Storage Used', value: formatSize(summary?.total_file_size || 0), color: 'var(--warning)', raw: summary?.total_file_size ?? 0 },
+    { icon: FiAlertCircle, label: 'Alerts', value: alertCount, color: alertCount > 0 ? 'var(--accent)' : 'var(--info)', raw: alertCount },
   ];
 
   function formatSize(bytes) {
@@ -48,7 +49,25 @@ export default function Dashboard() {
   }
 
   if (loading) {
-    return <div className="d-flex justify-content-center py-5"><Spinner animation="border" variant="primary" /></div>;
+    return (
+      <Container fluid className="py-4">
+        <Row className="g-3 mb-4">
+          {[...Array(4)].map((_, i) => (
+            <Col key={i} sm={6} lg={3}>
+              <Skeleton variant="kpi" />
+            </Col>
+          ))}
+        </Row>
+        <Row className="g-4">
+          <Col lg={8}>
+            <Skeleton variant="card" height={320} />
+          </Col>
+          <Col lg={4}>
+            <Skeleton variant="card" height={320} />
+          </Col>
+        </Row>
+      </Container>
+    );
   }
 
   return (
@@ -60,14 +79,16 @@ export default function Dashboard() {
 
       {/* KPI Cards */}
       <Row className="g-4 mb-4">
-        {kpiCards.map(({ icon: Icon, label, value, color }) => (
+        {kpiCards.map(({ icon: Icon, label, value, color, raw }) => (
           <Col key={label} sm={6} lg={3}>
-            <Card className="kpi-card border-0 shadow-sm h-100">
+            <Card className="kpi-card border-0 shadow-sm h-100 card-hover-lift">
               <Card.Body className="d-flex align-items-center gap-3">
                 <div className="kpi-icon" style={{ backgroundColor: color + '15', color }}><Icon size={24} /></div>
                 <div>
                   <div className="text-muted small">{label}</div>
-                  <div className="fw-bold fs-4">{value}</div>
+                  <div className="fw-bold fs-4">
+                    {label === 'Total Records' || label === 'Storage Used' ? value : <CountUp end={raw} />}
+                  </div>
                 </div>
               </Card.Body>
             </Card>

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { PageTransition } from './components/PageTransition';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import Login from './pages/Login';
@@ -27,15 +28,15 @@ function AppLayout() {
         <Sidebar />
         <main className="app-main">
           <Routes>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/upload" element={<Upload />} />
-            <Route path="/datasets" element={<DatasetList />} />
-            <Route path="/datasets/:id" element={<DatasetDetail />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/assurance" element={<Assurance />} />
+            <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
+            <Route path="/upload" element={<PageTransition><Upload /></PageTransition>} />
+            <Route path="/datasets" element={<PageTransition><DatasetList /></PageTransition>} />
+            <Route path="/datasets/:id" element={<PageTransition><DatasetDetail /></PageTransition>} />
+            <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+            <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
+            <Route path="/analytics" element={<PageTransition><Analytics /></PageTransition>} />
+            <Route path="/reports" element={<PageTransition><Reports /></PageTransition>} />
+            <Route path="/assurance" element={<PageTransition><Assurance /></PageTransition>} />
           </Routes>
         </main>
       </div>

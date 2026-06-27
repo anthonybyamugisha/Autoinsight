@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
-import { Container, Card, Table, Button, Badge, Form, InputGroup, Spinner } from 'react-bootstrap';
+import { Container, Card, Table, Button, Badge, Form, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { datasetService } from '../services/datasets';
 import { FiSearch, FiEye, FiTrash2, FiUploadCloud, FiDatabase } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { Skeleton } from '../components/PageTransition';
 
 const classBadge = (c) => {
   const map = { public: 'secondary', internal: 'info', confidential: 'warning', restricted: 'danger' };
@@ -72,7 +73,27 @@ export default function DatasetList() {
           </div>
 
           {loading ? (
-            <div className="text-center py-5"><Spinner animation="border" /></div>
+            <div className="p-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="d-flex align-items-center gap-3 py-3 border-bottom">
+                  <div className="flex-grow-1">
+                    <Skeleton variant="text" width="md" />
+                    <div className="d-flex gap-2 mt-2">
+                      <Skeleton variant="badge" width={60} height={18} />
+                      <Skeleton variant="badge" width={40} height={18} />
+                    </div>
+                  </div>
+                  <Skeleton variant="text" width={80} />
+                  <Skeleton variant="text" width={70} />
+                  <Skeleton variant="text" width={60} />
+                  <Skeleton variant="badge" width={70} />
+                  <div className="d-flex gap-1">
+                    <Skeleton variant="badge" width={32} height={32} />
+                    <Skeleton variant="badge" width={32} height={32} />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : datasets.length === 0 ? (
             <div className="text-center py-5">
               <FiDatabase size={48} className="text-muted mb-3" />
@@ -92,8 +113,8 @@ export default function DatasetList() {
                 </tr>
               </thead>
               <tbody>
-                {datasets.map((ds) => (
-                  <tr key={ds.id}>
+                {datasets.map((ds, idx) => (
+                  <tr key={ds.id} className={`table-row-enter stagger-item stagger-item-delay-${Math.min(idx + 1, 8)}`}>
                     <td>
                       <div className="fw-semibold">{ds.name}</div>
                       {ds.is_expired && <Badge bg="secondary" className="me-1">Expired</Badge>}
@@ -105,11 +126,11 @@ export default function DatasetList() {
                     <td>{ds.row_count.toLocaleString()}</td>
                     <td>{statusBadge(ds.status)}</td>
                     <td className="text-end">
-                      <Button variant="outline-primary" size="sm" className="me-1" onClick={() => navigate(`/datasets/${ds.id}`)}>
+                      <Button variant="outline-primary" size="sm" className="me-1 btn-press" onClick={() => navigate(`/datasets/${ds.id}`)}>
                         <FiEye />
                       </Button>
                       {user?.role !== 'assurance' && (
-                        <Button variant="outline-danger" size="sm" onClick={() => handleDelete(ds.id, ds.name)}>
+                        <Button variant="outline-danger" size="sm" className="btn-press" onClick={() => handleDelete(ds.id, ds.name)}>
                           <FiTrash2 />
                         </Button>
                       )}
