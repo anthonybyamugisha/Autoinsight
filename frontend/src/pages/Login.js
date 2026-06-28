@@ -36,7 +36,7 @@ export default function Login() {
           <Col md={5} lg={4}>
             <div className="text-center mb-4">
               <h2 className="fw-bold" style={{color: '#FFFFFF'}}>AutoInsight</h2>
-              <p style={{color: 'rgba(255,255,255,0.6)'}}>Business Intelligence & Analytics Platform</p>
+              <p style={{color: 'rgba(255,255,255,0.6)'}}>Business Intelligence and Analytics Platform</p>
             </div>
 
             <Card className="auth-card border-0 shadow-sm">
@@ -97,7 +97,7 @@ export default function Login() {
 
             <div className="text-center mt-4">
               <small style={{color: 'rgba(255,255,255,0.4)'}}>
-                <span style={{color: '#FFE600', fontWeight: 600}}>Centenary Bank</span> — Quality Assurance Department
+                <span style={{color: '#FFE600', fontWeight: 600}}>Centenary Bank</span> Quality Assurance Department
               </small>
             </div>
           </Col>

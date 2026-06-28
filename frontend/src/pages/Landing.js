@@ -61,7 +61,7 @@ export default function Landing() {
       {/* Hero */}
       <section className="landing-hero">
         <div className="landing-container text-center">
-          <div className="hero-badge hero-fade-up hero-fade-up-delay-1">Centenary Bank — Quality Assurance</div>
+          <div className="hero-badge hero-fade-up hero-fade-up-delay-1">Centenary Bank Quality Assurance</div>
           <h1 className="hero-title hero-fade-up hero-fade-up-delay-2">
             Business Intelligence<br />
             <span className="hero-highlight">&amp; Analytics Platform</span>
@@ -152,7 +152,7 @@ export default function Landing() {
             <Link to="/register" className="footer-link">Register</Link>
           </div>
           <div className="footer-copy">
-            &copy; {new Date().getFullYear()} Centenary Bank — QA Department
+            &copy; {new Date().getFullYear()} Centenary Bank QA Department
           </div>
         </div>
       </footer>

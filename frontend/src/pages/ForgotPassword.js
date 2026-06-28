@@ -91,7 +91,7 @@ export default function ForgotPassword() {
 
             <div className="text-center mt-4">
               <small style={{ color: 'rgba(255,255,255,0.4)' }}>
-                <span style={{ color: '#FFE600', fontWeight: 600 }}>Centenary Bank</span> — Quality Assurance Department
+                <span style={{ color: '#FFE600', fontWeight: 600 }}>Centenary Bank</span> Quality Assurance Department
               </small>
             </div>
           </Col>
