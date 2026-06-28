@@ -2,7 +2,7 @@
 
 **Automated Data Quality Analytics & Assurance Platform**
 
-AutoInsight is a full-stack web application developed for **Centenary Bank's Quality Assurance (QA)** department. It enables analysts and managers to upload datasets, perform automated quality checks, detect anomalies, generate analytical reports, and maintain a comprehensive audit trail — all within a secure, role-based environment.
+AutoInsight is a full-stack web application developed for **Centenary Bank's Quality Assurance (QA)** department. It enables analysts and managers to upload datasets, perform automated quality checks, detect anomalies, generate analytical reports, and maintain a comprehensive audit trail all within a secure, role-based environment.
 
 ---
 
@@ -47,7 +47,7 @@ AutoInsight is a full-stack web application developed for **Centenary Bank's Qua
 └──────────────────────┬──────────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────────┐
-│              Database (SQLite / PostgreSQL)              │
+│              Database (SQLite)              │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -121,42 +121,42 @@ AutoInsight/
 ├── README.md
 ├── backend/
 │   ├── __init__.py
-│   ├── asgi.py                  # ASGI entry point
-│   ├── wsgi.py                  # WSGI entry point
-│   ├── manage.py                # Django management script
-│   ├── settings.py              # Django configuration
-│   ├── urls.py                  # Root URL routing
-│   ├── requirements.txt         # Python dependencies
+│   ├── asgi.py                  
+│   ├── wsgi.py                  
+│   ├── manage.py               
+│   ├── settings.py            
+│   ├── urls.py                 
+│   ├── requirements.txt        
 │   ├── .gitignore
-│   ├── db.sqlite3               # Development database
-│   ├── users/                   # User management app
-│   │   ├── models.py            # Custom User model (email-based auth)
-│   │   ├── serializers.py       # Registration, profile, password reset
-│   │   ├── views.py             # Login, register, profile, password management
-│   │   ├── urls.py              # User-related API routes
-│   │   ├── permissions.py       # Role-based permission classes
-│   │   ├── security.py          # Login lockout logic
-│   │   ├── throttling.py        # Rate limiting classes
+│   ├── db.sqlite3               
+│   ├── users/                  
+│   │   ├── models.py           
+│   │   ├── serializers.py       
+│   │   ├── views.py             
+│   │   ├── urls.py             
+│   │   ├── permissions.py       
+│   │   ├── security.py          
+│   │   ├── throttling.py        
 │   │   └── migrations/
-│   ├── datasets/                # Dataset management app
-│   │   ├── models.py            # Dataset, DataRecord models
-│   │   ├── serializers.py       # Upload, list, detail serializers
-│   │   ├── views.py             # Upload, preview, analytics, export
-│   │   ├── urls.py              # Dataset-related API routes
-│   │   ├── utils.py             # File processing, data masking
-│   │   ├── access.py            # Dataset access control & retention
-│   │   ├── advanced_views.py    # Analytics, trends, quality, anomalies
-│   │   ├── management/          # Custom management commands
+│   ├── datasets/               
+│   │   ├── models.py           
+│   │   ├── serializers.py       
+│   │   ├── views.py             
+│   │   ├── urls.py              
+│   │   ├── utils.py             
+│   │   ├── access.py            
+│   │   ├── advanced_views.py    
+│   │   ├── management/          
 │   │   │   └── commands/
 │   │   │       └── enforce_retention.py
 │   │   └── migrations/
-│   └── audit/                   # Audit & alerting app
-│       ├── models.py            # AuditLog, Alert models
-│       ├── serializers.py       # Log and alert serializers
-│       ├── views.py             # Log/alert listing, mark read
-│       ├── urls.py              # Audit-related API routes
-│       ├── utils.py             # Log action helper
-│       ├── security.py          # Security event handlers
+│   └── audit/                  
+│       ├── models.py           
+│       ├── serializers.py       
+│       ├── views.py             
+│       ├── urls.py              
+│       ├── utils.py             
+│       ├── security.py          
 │       └── migrations/
 └── frontend/
     ├── package.json
@@ -168,33 +168,33 @@ AutoInsight/
     │   │   └── centenary bank logo.png
     │   └── ...
     └── src/
-        ├── index.js             # React entry point
-        ├── App.js               # Root component with routing
+        ├── index.js            
+        ├── App.js              
         ├── context/
-        │   └── AuthContext.js   # Authentication state management
+        │   └── AuthContext.js   
         ├── services/
-        │   ├── api.js           # Axios instance with JWT interceptor
-        │   ├── auth.js          # Auth API calls
-        │   ├── datasets.js      # Dataset API calls
-        │   └── audit.js         # Audit API calls
+        │   ├── api.js           
+        │   ├── auth.js         
+        │   ├── datasets.js      
+        │   └── audit.js        
         ├── components/
-        │   ├── Navbar.js        # Top navigation bar
-        │   ├── Sidebar.js       # Side navigation with role-based items
-        │   ├── ProtectedRoute.js # Auth guard component
-        │   └── PageTransition.js # Page transition animations
+        │   ├── Navbar.js       
+        │   ├── Sidebar.js       
+        │   ├── ProtectedRoute.js 
+        │   └── PageTransition.js 
         └── pages/
-            ├── Landing.js       # Public landing page
-            ├── Login.js         # Login form
-            ├── Register.js      # Registration form
-            ├── Dashboard.js     # Main dashboard
-            ├── Upload.js        # Dataset upload
-            ├── DatasetList.js   # Dataset listing
-            ├── DatasetDetail.js # Dataset detail & preview
-            ├── Analytics.js     # Analytics & visualisations
-            ├── Reports.js       # Report generation
-            ├── Assurance.js     # Security assurance (manager only)
-            ├── Profile.js       # User profile
-            ├── Settings.js      # User settings
+            ├── Landing.js     
+            ├── Login.js        
+            ├── Register.js     
+            ├── Dashboard.js    
+            ├── Upload.js       
+            ├── DatasetList.js   
+            ├── DatasetDetail.js 
+            ├── Analytics.js    
+            ├── Reports.js     
+            ├── Assurance.js   
+            ├── Profile.js     
+            ├── Settings.js
             ├── ForgotPassword.js
             └── ResetPassword.js
 ```

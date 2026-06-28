@@ -12,7 +12,7 @@ const features = [
   {
     icon: FiBarChart2,
     title: 'Instant Analytics',
-    desc: 'Column-level statistics, trend analysis, and interactive charts — all generated automatically from your data.',
+    desc: 'Column-level statistics, trend analysis, and interactive charts, all generated automatically from your data.',
   },
   {
     icon: FiShield,
@@ -32,7 +32,7 @@ const features = [
   {
     icon: FiActivity,
     title: 'Audit Trail',
-    desc: 'Every action is logged — uploads, views, exports, and deletions — for full transparency and compliance.',
+    desc: 'Every action is logged, uploads, views, exports, and deletions,  for full transparency and compliance.',
   },
 ];
 
@@ -68,7 +68,7 @@ export default function Landing() {
           </h1>
           <p className="hero-subtitle hero-fade-up hero-fade-up-delay-3">
             Upload any dataset and get instant analytics, data quality scores,
-            anomaly detection, and professional reports — no data science degree required.
+            anomaly detection, and professional reports.
           </p>
           <div className="d-flex justify-content-center gap-3 mt-4" style={{ position: 'relative', zIndex: 1 }}>
             <Link to="/register" className="btn btn-landing-primary-white btn-lg px-4">
