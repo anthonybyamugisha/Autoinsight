@@ -28,7 +28,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('password_confirm', None)
         password = validated_data.pop('password')
         role = validated_data.pop('role', 'analyst')
-        # Auto-generate username from email to avoid UNIQUE constraint failures
         validated_data.setdefault('username', validated_data.get('email', '').split('@')[0])
         user = User(**validated_data, role=role)
         user.set_password(password)
