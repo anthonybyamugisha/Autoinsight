@@ -13,6 +13,10 @@ const ACTION_ICONS = {
   login_failed: FiAlertCircle, access_denied: FiShield,
 };
 
+function formatAction(action) {
+  return action.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export default function Dashboard() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -127,7 +131,7 @@ export default function Dashboard() {
                           log.action === 'delete' ? 'danger' :
                           log.action === 'export' ? 'info' : 'secondary'
                         } className="activity-badge">
-                          {log.action}
+                          {formatAction(log.action)}
                         </Badge>
                       </div>
                     );

@@ -87,7 +87,7 @@ export default function Assurance() {
                   <tbody>
                     {summary.recent_security_logs.map((log) => (
                       <tr key={log.id}>
-                        <td><Badge bg="secondary">{log.action}</Badge></td>
+                        <td><Badge bg="secondary">{log.action.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</Badge></td>
                         <td className="small">{log.description}</td>
                         <td className="small">{log.user_name}</td>
                         <td className="small text-muted">{new Date(log.created_at).toLocaleString()}</td>
