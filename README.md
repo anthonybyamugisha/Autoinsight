@@ -53,7 +53,7 @@ AutoInsight is a full-stack web application developed for **Centenary Bank's Qua
 
 - **Frontend**: React SPA communicating with the backend via REST API
 - **Backend**: Django REST Framework providing a RESTful API
-- **Database**: SQLite for development, PostgreSQL for production
+- **Database**: SQLite for development
 - **Authentication**: JWT (JSON Web Tokens) via `djangorestframework-simplejwt`
 
 ---
@@ -61,24 +61,24 @@ AutoInsight is a full-stack web application developed for **Centenary Bank's Qua
 ## Features
 
 ### Data Management
-- **Upload datasets** — CSV, Excel, and other tabular formats (up to 500 MB)
-- **Automatic processing** — Column detection, row counting, data type inference
-- **Data preview** — View sample rows with sensitive data masking
-- **Export reports** — Download as Excel or PDF
+- **Upload datasets**. CSV, Excel, and other tabular formats (up to 500 MB)
+- **Automatic processing**. Column detection, row counting, data type inference
+- **Data preview**. View sample rows with sensitive data masking
+- **Export reports**. Download as Excel or PDF
 
 ### Analytics & Quality
-- **Automated quality checks** — Completeness, consistency, validity, and accuracy metrics
-- **Anomaly detection** — Statistical outlier identification across numerical columns
-- **Trend analysis** — Time-series visualisation of data patterns
-- **Interactive dashboards** — Chart.js powered visual analytics
+- **Automated quality checks**. Completeness, consistency, validity, and accuracy metrics
+- **Anomaly detection**. Statistical outlier identification across numerical columns
+- **Trend analysis**. Time-series visualisation of data patterns
+- **Interactive dashboards**. Chart.js powered visual analytics
 
 ### Security & Compliance
-- **Role-based access control** — Analyst and Manager roles with distinct permissions
-- **Data classification** — Public, Internal, Confidential, Restricted
-- **Sensitive data masking** — Automatic detection and masking of PII columns
-- **Data retention policies** — Configurable retention periods with automatic expiry
-- **Login lockout** — Account lockout after configurable failed attempts
-- **Rate limiting** — Per-endpoint throttling (login, upload, password reset)
+- **Role-based access control**. Analyst and Manager roles with distinct permissions
+- **Data classification**. Public, Internal, Confidential, Restricted
+- **Sensitive data masking**. Automatic detection and masking of PII columns
+- **Data retention policies**. Configurable retention periods with automatic expiry
+- **Login lockout**. Account lockout after configurable failed attempts
+- **Rate limiting**. Per-endpoint throttling (login, upload, password reset)
 
 ### Audit & Monitoring
 - **Comprehensive audit log** — All user actions recorded with timestamps and IP addresses
